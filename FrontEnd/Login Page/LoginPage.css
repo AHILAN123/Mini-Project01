@@ -1,0 +1,316 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap");
+
+/* ---------- Layout shell ---------- */
+
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  /* Fallback shows if watermark.jpg is missing/still loading, and shows
+     through anywhere the photo doesn't fully cover on odd aspect ratios. */
+  background: linear-gradient(160deg, #2f5a52 0%, #4b7f74 45%, #6fa89a 100%);
+  font-family: "Inter", sans-serif;
+}
+
+/* ---------- Background watermark photo ---------- */
+
+.login-page__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* Darkens/evens out the photo so the glass panel + white text stay
+   legible regardless of what's in the image. Tune the opacity to taste
+   once your real photo is in. */
+.login-page__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    160deg,
+    rgba(20, 40, 36, 0.75) 0%,
+    rgba(47, 90, 82, 0.6) 45%,
+    rgba(111, 168, 154, 0.55) 100%
+  );
+}
+
+.glass-frame {
+  position: relative;
+  z-index: 2; /* sits above the background photo + overlay */
+}
+
+/* ---------- In-card seal watermark ---------- */
+
+.glass-frame__watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 55%;
+  max-width: 420px;
+  opacity: 0.08; /* faint, decorative only — never fight the form for attention */
+  pointer-events: none;
+  z-index: -1; /* negative so it paints behind navbar/hero, which are non-positioned in-flow content */
+  user-select: none;
+}
+
+/* ---------- Outer glass frame ---------- */
+
+.glass-frame {
+  width: 100%;
+  max-width: 1259px;
+  aspect-ratio: 1259 / 892;
+  border-radius: 30px;
+  padding: 28px 40px 40px;
+  box-sizing: border-box;
+
+  background: rgba(217, 217, 217, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ---------- Navbar ---------- */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border: 1px solid rgba(255, 251, 251, 0.8);
+  border-radius: 30px;
+}
+
+.nav-left,
+.nav-right {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-pill {
+  padding: 10px 26px;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.18);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.nav-pill:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.nav-pill:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------- Hero row ---------- */
+
+.hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+/* ----- Branding ----- */
+
+.branding {
+  color: #fff;
+  padding-left: 8px;
+}
+
+.branding__title {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+
+.branding__tagline {
+  font-size: 16px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* ----- Auth card ----- */
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  padding: 28px 36px 36px;
+  box-sizing: border-box;
+  border-radius: 30px;
+
+  background: rgba(217, 217, 217, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 24px;
+}
+
+.auth-tab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-tab--active {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+.auth-tab:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ----- Form ----- */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0 20px;
+}
+
+.input-group input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 16px 0;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+}
+
+.input-group input::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.input-icon {
+  color: rgba(255, 255, 255, 0.75);
+  flex-shrink: 0;
+}
+
+.submit-btn {
+  margin-top: 8px;
+  padding: 14px 0;
+  border: none;
+  border-radius: 30px;
+  background: #37d06b;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+.submit-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.submit-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.forgot-link {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.auth-form--placeholder {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 40px 0;
+  text-align: center;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px) {
+  .glass-frame {
+    aspect-ratio: auto;
+    padding: 20px;
+  }
+
+  .hero {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .branding {
+    padding-left: 0;
+  }
+
+  .auth-card {
+    max-width: 100%;
+  }
+
+  .nav-pill {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-left .nav-pill:nth-child(2),
+  .nav-right .nav-pill:nth-child(2) {
+    display: none; /* keep the navbar from wrapping on very small screens */
+  }
+}

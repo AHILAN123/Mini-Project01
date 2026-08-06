@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IIEST Shibpur | Log in</title>
+<link rel="stylesheet" href="LoginPage.css" />
+</head>
+<body>
+
+<div class="login-page">
+
+  <!-- Background watermark photo. Swap the src for your own image
+       (campus building, seal, etc). Kept as an <img> rather than a CSS
+       background so it can carry meaningful alt text / lazy-load. -->
+  <img class="login-page__bg" src="COLLEGE.jpeg" alt="" />
+  <div class="login-page__overlay"></div>
+
+  <div class="glass-frame">
+
+    <!-- Faint institute seal watermark inside the card itself.
+         Swap the src for your crest/logo file. Purely decorative,
+         so it's aria-hidden and has no alt text. -->
+    <img class="glass-frame__watermark" src="seal.png" alt="" aria-hidden="true" />
+
+    
+    
+    
+    <!-- ---------- Navbar ---------- -->
+    <nav class="navbar">
+      <div class="nav-left">
+        <a href="/" class="nav-logo">
+          <img src="Logo.png">
+        </a>
+      </div>
+      <div class="nav-right">
+        <button class="nav-pill">Sign-Up</button>
+        <button class="nav-pill">Contact us</button>
+      </div>
+    </nav>
+
+   
+   
+   
+    <!-- ---------- Hero row ---------- -->
+    <div class="hero">
+
+      <!-- ----- Branding (left) ----- -->
+      <div class="branding">
+        <h1 class="branding__title">IIEST<br />Shibpur</h1>
+        <p class="branding__tagline">उत्तिष्ठ जाग्रत प्राप्य वरान्निबोधत</p>
+      </div>
+
+      <!-- ----- Auth card (right) ----- -->
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab auth-tab--active" data-tab="login">Log in</button>
+        </div>
+
+        <!-- Log in form -->
+        <form class="auth-form" id="login-form" data-panel="login">
+          <div class="input-group">
+            <input type="text" id="username" name="username" placeholder="Enter username" />
+            <!-- lucide "User" icon, inlined as SVG -->
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+
+          <div class="input-group">
+            <input type="password" id="password" name="password" placeholder="Enter password" />
+            <!-- lucide "Lock" icon, inlined as SVG -->
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+
+          <button type="submit" class="submit-btn">Log in</button>
+          <a href="#forgot-password" class="forgot-link">Forgot password?</a>
+        </form>
+
+        <!-- Sign up placeholder -->
+        <div class="auth-form auth-form--placeholder" id="signup-panel" data-panel="signup" hidden>
+          <p>Sign up form goes here.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tab switching: mirrors the React useState(activeTab) logic
+  const tabs = document.querySelectorAll(".auth-tab");
+  const panels = document.querySelectorAll("[data-panel]");
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.tab;
+
+      tabs.forEach((t) => t.classList.toggle("auth-tab--active", t === tab));
+      panels.forEach((p) => {
+        p.hidden = p.dataset.panel !== target;
+      });
+    });
+  });
+
+  // Form submit: mirrors the React handleSubmit (just logs for now)
+  document.getElementById("login-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    // TODO: wire up real authentication
+    console.log({ username, password });
+  });
+</script>
+
+</body>
+</html>

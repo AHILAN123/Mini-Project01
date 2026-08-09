@@ -1,0 +1,855 @@
+/* =========================================
+   STUDENT EMAIL VERIFICATION
+   ========================================= */
+
+
+/* =========================================
+   GOOGLE FONT
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+
+/* =========================================
+   RESET
+   ========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   BODY
+   ========================================= */
+
+body {
+    width: 100%;
+    min-height: 100vh;
+
+    font-family: 'Poppins', sans-serif;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   MAIN PAGE / BACKGROUND
+   ========================================= */
+
+.page-container {
+
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+
+    background-image: url("bg1.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+/* =========================================
+   DARK BLURRED OVERLAY
+   ========================================= */
+
+.page-container::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.42);
+
+    backdrop-filter: blur(7px);
+
+    -webkit-backdrop-filter: blur(7px);
+
+    z-index: 0;
+}
+
+
+/* =========================================
+   MAIN WHITE BOX
+   ========================================= */
+
+.create-account-box {
+
+    position: relative;
+
+    z-index: 1;
+
+    width: 520px;
+
+    min-height: 500px;
+
+    padding: 32px 42px 38px;
+
+    background: rgba(255, 255, 255, 0.97);
+
+    border: 1px solid rgba(255, 255, 255, 0.75);
+
+    border-radius: 28px;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.35),
+        0 0 25px rgba(255, 255, 255, 0.08);
+
+    display: flex;
+
+    flex-direction: column;
+
+    transition: min-height 0.3s ease;
+}
+
+
+/* =========================================
+   BACK BUTTON
+   ========================================= */
+
+.back-btn {
+
+    align-self: flex-start;
+
+    padding: 8px 16px;
+
+    border: 1px solid rgba(212, 175, 55, 0.5);
+
+    border-radius: 9px;
+
+    background: rgba(212, 175, 55, 0.12);
+
+    color: #9b7910;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+
+.back-btn:hover {
+
+    background: #d4af37;
+
+    color: white;
+
+    transform: translateX(-2px);
+}
+
+
+/* =========================================
+   MAIN HEADING
+   ========================================= */
+
+.create-account-box h1 {
+
+    text-align: center;
+
+    margin-top: -5px;
+
+    margin-bottom: 28px;
+
+    color: #222222;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 36px;
+
+    font-weight: 700;
+
+    line-height: 1.15;
+}
+
+
+/* =========================================
+   FORM SECTION
+   ========================================= */
+
+.form-section {
+
+    width: 100%;
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================
+   LABELS
+   ========================================= */
+
+.form-section label,
+.otp-section label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #292929;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 15px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   EMAIL INPUT
+   ========================================= */
+
+.email-wrapper {
+
+    width: 100%;
+
+    height: 58px;
+
+    display: flex;
+
+    align-items: center;
+
+    overflow: hidden;
+
+    background: #f7f7f7;
+
+    border: 1px solid #d6d6d6;
+
+    border-radius: 17px;
+
+    transition: all 0.25s ease;
+}
+
+
+.email-wrapper:focus-within {
+
+    border-color: #d4af37;
+
+    box-shadow:
+        0 0 0 2px rgba(212, 175, 55, 0.15);
+}
+
+
+/* =========================================
+   EMAIL INPUT FIELD
+   ========================================= */
+
+.email-wrapper input {
+
+    width: 100%;
+
+    height: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    padding: 0 17px;
+
+    color: #333333;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 14px;
+}
+
+
+.email-wrapper input::placeholder {
+
+    color: #9a9a9a;
+
+    font-family: 'Poppins', sans-serif;
+}
+
+
+/* =========================================
+   SEND OTP BUTTON
+   ========================================= */
+
+.send-otp-btn {
+
+    width: 260px;
+
+    height: 56px;
+
+    align-self: center;
+
+    margin-top: 25px;
+
+    border: 1px solid #d4af37;
+
+    border-radius: 16px;
+
+    background: #d4af37;
+
+    color: white;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.15);
+
+    transition: all 0.25s ease;
+}
+
+
+.send-otp-btn:hover {
+
+    background: #c29d22;
+
+    border-color: #c29d22;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+
+.send-otp-btn:active {
+
+    transform: translateY(0);
+}
+
+
+/* =========================================
+   OTP SECTION
+   ========================================= */
+
+.otp-section {
+
+    display: none;
+
+    width: 100%;
+
+    margin-top: 3px;
+}
+
+
+/* =========================================
+   OTP INPUT WRAPPER
+   ========================================= */
+
+.otp-input-wrapper {
+
+    position: relative;
+
+    width: 100%;
+
+    height: 58px;
+
+    background: #f7f7f7;
+
+    border: 1px solid #d6d6d6;
+
+    border-radius: 17px;
+
+    transition: all 0.25s ease;
+}
+
+
+.otp-input-wrapper:focus-within {
+
+    border-color: #d4af37;
+
+    box-shadow:
+        0 0 0 2px rgba(212, 175, 55, 0.15);
+}
+
+
+/* =========================================
+   OTP INPUT
+   ========================================= */
+
+.otp-input-wrapper input {
+
+    width: 100%;
+
+    height: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    padding: 0 20px;
+
+    color: #333333;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 20px;
+
+    font-weight: 600;
+
+    text-align: center;
+
+    letter-spacing: 8px;
+}
+
+
+/* =========================================
+   OTP CUSTOM PLACEHOLDER
+   ========================================= */
+
+.otp-placeholder {
+
+    position: absolute;
+
+    top: 50%;
+
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    color: #9a9a9a;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 400;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+}
+
+
+/* Hide placeholder when typing */
+
+.otp-input-wrapper.has-value .otp-placeholder {
+
+    display: none;
+}
+
+
+/* =========================================
+   VERIFY OTP BUTTON
+   ========================================= */
+
+.verify-btn {
+
+    display: block;
+
+    width: 240px;
+
+    height: 52px;
+
+    margin: 20px auto 10px;
+
+    border: 1px solid #d4af37;
+
+    border-radius: 15px;
+
+    background: #d4af37;
+
+    color: white;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.14);
+
+    transition: all 0.25s ease;
+}
+
+
+.verify-btn:hover {
+
+    background: #c29d22;
+
+    border-color: #c29d22;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+
+.verify-btn:active {
+
+    transform: translateY(0);
+}
+
+
+/* =========================================
+   RESEND OTP
+   ========================================= */
+
+.resend-text {
+
+    text-align: center;
+
+    margin-top: 8px;
+
+    color: #777777;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 12px;
+}
+
+
+.resend-btn {
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #b08b00;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.resend-btn:hover {
+
+    color: #806500;
+
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   VERIFIED SUCCESS SECTION
+   ========================================= */
+
+.verification-success {
+
+    display: none;
+
+    width: 100%;
+
+    text-align: center;
+
+    margin-top: 5px;
+
+    animation: successFadeIn 0.4s ease;
+}
+
+
+/* =========================================
+   GREEN CHECK CIRCLE
+   ========================================= */
+
+.success-check {
+
+    width: 78px;
+
+    height: 78px;
+
+    margin: 5px auto 15px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #28a745;
+
+    color: white;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 43px;
+
+    font-weight: 600;
+
+    box-shadow:
+        0 7px 20px rgba(40, 167, 69, 0.28);
+
+    animation: checkPop 0.45s ease;
+}
+
+
+/* =========================================
+   VERIFIED HEADING
+   ========================================= */
+
+.verification-success h2 {
+
+    margin-bottom: 8px;
+
+    color: #28a745;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 28px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================
+   SUCCESS MESSAGE
+   ========================================= */
+
+.verification-success p {
+
+    max-width: 340px;
+
+    margin: 0 auto;
+
+    color: #777777;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   CONTINUE BUTTON
+   ========================================= */
+
+.continue-btn {
+
+    width: 240px;
+
+    height: 52px;
+
+    margin-top: 25px;
+
+    border: 1px solid #d4af37;
+
+    border-radius: 15px;
+
+    background: #d4af37;
+
+    color: white;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.14);
+
+    transition: all 0.25s ease;
+}
+
+
+.continue-btn:hover {
+
+    background: #c29d22;
+
+    border-color: #c29d22;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+
+.continue-btn:active {
+
+    transform: translateY(0);
+}
+
+
+/* =========================================
+   SUCCESS ANIMATIONS
+   ========================================= */
+
+@keyframes checkPop {
+
+    0% {
+
+        transform: scale(0);
+
+        opacity: 0;
+
+    }
+
+    60% {
+
+        transform: scale(1.12);
+
+        opacity: 1;
+
+    }
+
+    100% {
+
+        transform: scale(1);
+
+        opacity: 1;
+
+    }
+}
+
+
+@keyframes successFadeIn {
+
+    0% {
+
+        opacity: 0;
+
+        transform: translateY(10px);
+
+    }
+
+    100% {
+
+        opacity: 1;
+
+        transform: translateY(0);
+
+    }
+}
+
+
+/* =========================================
+   RESPONSIVE DESIGN
+   ========================================= */
+
+@media (max-width: 650px) {
+
+    .create-account-box {
+
+        width: 90%;
+
+        min-height: 480px;
+
+        padding: 28px 30px 35px;
+
+        border-radius: 24px;
+    }
+
+
+    .create-account-box h1 {
+
+        font-size: 32px;
+    }
+
+}
+
+
+@media (max-width: 450px) {
+
+    .create-account-box {
+
+        width: 94%;
+
+        padding: 24px 20px 30px;
+    }
+
+
+    .create-account-box h1 {
+
+        font-size: 29px;
+    }
+
+
+    .email-wrapper {
+
+        height: 54px;
+    }
+
+
+    .email-wrapper input {
+
+        font-size: 13px;
+
+        padding: 0 12px;
+    }
+
+
+    .send-otp-btn {
+
+        width: 220px;
+
+        height: 52px;
+
+        font-size: 15px;
+    }
+
+
+    .verify-btn {
+
+        width: 220px;
+
+        height: 52px;
+
+        font-size: 15px;
+    }
+
+
+    .continue-btn {
+
+        width: 220px;
+
+        height: 52px;
+
+        font-size: 15px;
+    }
+
+
+    .success-check {
+
+        width: 70px;
+
+        height: 70px;
+
+        font-size: 38px;
+    }
+
+
+    .verification-success h2 {
+
+        font-size: 25px;
+    }
+
+}

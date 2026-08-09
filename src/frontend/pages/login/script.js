@@ -1,202 +1,47 @@
-/*==================================================
-        IIEST SHIBPUR
-Semester Registration Portal; SCRIPT.JS
-==================================================*/
-
-
-/*==============================
-        DOM ELEMENTS
-==============================*/
-
-const form = document.querySelector("form");
-
-const emailInput = document.querySelector(".email-group input");
-
-const passwordInput = document.querySelector(".password-group input");
-
-const eyeButton = document.getElementById("togglePassword");
-
-const loginButton = document.querySelector(".login-btn");
-
-
-/*==============================
-        SHOW PASSWORD
-==============================*/
-
-eyeButton.addEventListener("click", () => {
-
-    if (passwordInput.type === "password") {
-
-        passwordInput.type = "text";
-
-        eyeButton.classList.remove("fa-eye");
-        eyeButton.classList.add("fa-eye-slash");
-
-    } else {
-
-        passwordInput.type = "password";
-
-        eyeButton.classList.remove("fa-eye-slash");
-        eyeButton.classList.add("fa-eye");
-
-    }
-
-});
-
-
-/*==============================
-        EMAIL VALIDATION
-==============================*/
-
-function isValidEmail(email){
-
-    const regex =
-    /^[a-zA-Z0-9._%+-]+@students\.iiests\.ac\.in$/;
-
-    return regex.test(email);
-
-}
-
-
-/*==============================
-        LOGIN
-==============================*/
-
-form.addEventListener("submit",(e)=>{
-
-    e.preventDefault();
-
-    const email=emailInput.value.trim();
-
-    const password=passwordInput.value.trim();
-
-
-    if(email===""){
-
-        alert("Please enter your email.");
-
-        emailInput.focus();
-
-        return;
-
-    }
-
-
-    if(!isValidEmail(email)){
-
-        alert("Please enter a valid email.");
-
-        emailInput.focus();
-
-        return;
-
-    }
-
-
-    if(password===""){
-
-        alert("Please enter your password.");
-
-        passwordInput.focus();
-
-        return;
-
-    }
-
-
-    loginButton.disabled=true;
-
-    loginButton.innerHTML="Signing In...";
-
-
-    setTimeout(()=>{
-
-        loginButton.innerHTML="Login";
-
-        loginButton.disabled=false;
-
-        alert("Frontend Login Successful");
-
-    },1500);
-
-});
-
-
-/*==============================
-        INPUT EFFECT
-==============================*/
-
-const groups=document.querySelectorAll(
-
-".email-group,.password-group"
-
-);
-
-groups.forEach(group=>{
-
-    const input=group.querySelector("input");
-
-    input.addEventListener("focus",()=>{
-
-        group.style.transform="translateY(-2px)";
-
-    });
-
-    input.addEventListener("blur",()=>{
-
-        group.style.transform="translateY(0)";
-
-    });
-
-});
-
-
-/*==============================
-        ENTER KEY
-==============================*/
-
-document.addEventListener("keydown",(e)=>{
-
-    if(e.key==="Enter"){
-
-        loginButton.click();
-
-    }
-
-});
-
-
-/*==============================
-        ACTIVE MENU
-==============================*/
-
-const nav=document.querySelectorAll(".top-menu a");
-
-nav.forEach(item=>{
-
-    item.addEventListener("click",(e)=>{
-
-        e.preventDefault();
-
-        nav.forEach(link=>{
-
-            link.classList.remove("active");
-
+document.addEventListener("DOMContentLoaded", () => {
+    // =========================================
+    // 1. Password Visibility Toggle
+    // =========================================
+    const togglePassword = document.querySelector("#togglePassword");
+    const passwordInput = document.querySelector("#password");
+
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener("click", function () {
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            this.classList.toggle("fa-eye");
+            this.classList.toggle("fa-eye-slash");
         });
+    }
 
-        item.classList.add("active");
+    // =========================================
+    // 2. Light / Dark Mode Toggle
+    // =========================================
+    const themeToggleBtn = document.getElementById("themeToggle");
+    const themeIcon = themeToggleBtn.querySelector("i");
+    
+    // Check local storage to see if the user previously chose light mode
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+        document.body.setAttribute("data-theme", "light");
+        themeIcon.classList.replace("fa-sun", "fa-moon"); // Show moon when in light mode
+    }
 
+    // Toggle action
+    themeToggleBtn.addEventListener("click", (e) => {
+        e.preventDefault(); // Prevents the page from jumping to the top
+        
+        // If currently light mode, switch to dark
+        if (document.body.getAttribute("data-theme") === "light") {
+            document.body.removeAttribute("data-theme");
+            themeIcon.classList.replace("fa-moon", "fa-sun");
+            localStorage.setItem("theme", "dark");
+        } 
+        // If currently dark mode, switch to light
+        else {
+            document.body.setAttribute("data-theme", "light");
+            themeIcon.classList.replace("fa-sun", "fa-moon");
+            localStorage.setItem("theme", "light");
+        }
     });
-
-});
-
-
-/*==============================
-        PAGE LOADED
-==============================*/
-
-window.addEventListener("load",()=>{
-
-    console.log("IIEST Portal Loaded");
-
 });

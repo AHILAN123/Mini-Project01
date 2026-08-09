@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | IIEST Shibpur</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <!-- Background Image container -->
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <div class="dashboard-layout">
+        
+        <!-- ==========================================
+                    SIDEBAR NAVIGATION
+        =========================================== -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <img src="../../assets/images/logo.png" alt="IIEST Logo" class="sidebar-logo">
+                <h2>IIEST Shibpur</h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="view-home">
+                    <i class="fa-solid fa-house"></i> <span>Home</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-registration">
+                    <i class="fa-solid fa-pen-to-square"></i> <span>Registration Form</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-history">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span>History</span>
+                </a>
+                <a href="#" class="nav-item" data-target="view-settings">
+                    <i class="fa-solid fa-gear"></i> <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar">AB</div> 
+                    <div class="user-info">
+                        <span class="name">Aryan Behera</span>
+                        <span class="roll">2025CSB120</span>
+                    </div>
+                </div>
+                <a href="../login/index.html" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- ==========================================
+                    MAIN CONTENT AREA
+        =========================================== -->
+        <main class="main-content">
+            
+            <!-- Topbar -->
+            <header class="topbar glass-panel">
+                <h1 class="page-title" id="pageTitle">Home</h1>
+                <div class="topbar-actions">
+                    <button class="action-btn" id="themeToggle" title="Toggle Light/Dark Mode">
+                        <i class="fa-solid fa-sun" id="themeIcon"></i>
+                    </button>
+                    <button class="action-btn">
+                        <i class="fa-solid fa-circle-info"></i> Help
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dynamic Content Container -->
+            <div class="content-area glass-panel">
+                
+                <!-- VIEW: HOME -->
+                <div id="view-home" class="view-section active">
+                    
+                    <div class="home-grid">
+                        <!-- Main Left Column -->
+                        <div class="home-main-col">
+                            <div class="welcome-banner glass-card">
+                                <h2 class="gold-text">Welcome back, Aryan!</h2>
+                                <p>The semester registration portal is currently open. Ensure all your fee dues are cleared before generating your registration draft.</p>
+                            </div>
+
+                            <div class="status-cards">
+                                <div class="status-card glass-card">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                    <h4>Department</h4>
+                                    <p>CST</p>
+                                </div>
+                                <div class="status-card glass-card">
+                                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                                    <h4>Fee Status</h4>
+                                    <p class="text-success">Cleared</p>
+                                </div>
+                                <div class="status-card glass-card">
+                                    <i class="fa-solid fa-clipboard-check"></i>
+                                    <h4>Reg Status</h4>
+                                    <p class="text-warning">Pending</p>
+                                </div>
+                            </div>
+
+                            <div class="news-section glass-card">
+                                <div class="section-title">
+                                    <h3><i class="fa-regular fa-newspaper"></i> Latest Announcements</h3>
+                                    <a href="#">View All</a>
+                                </div>
+                                <div class="news-list">
+                                    <div class="news-item">
+                                        <div class="news-img" style="background-image: url('../../assets/images/bg1.jpg');"></div>
+                                        <div class="news-content">
+                                            <h4>IIEST Shibpur 168th Foundation Day</h4>
+                                            <p>Join us in celebrating the rich legacy and future innovations of our beloved institution.</p>
+                                            <span class="news-date">Aug 12, 2026</span>
+                                        </div>
+                                    </div>
+                                    <div class="news-item">
+                                        <div class="news-img" style="background-color: #294370; display:flex; align-items:center; justify-content:center; color:white;"><i class="fa-solid fa-graduation-cap fa-2x"></i></div>
+                                        <div class="news-content">
+                                            <h4>Convocation 2026 Guidelines</h4>
+                                            <p>Registration for the upcoming annual convocation is now live. Please verify your details.</p>
+                                            <span class="news-date">Aug 08, 2026</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Side Right Column -->
+                        <div class="home-side-col">
+                            <div class="placement-widget glass-card">
+                                <h3><i class="fa-solid fa-chart-line"></i> Placement Highlights</h3>
+                                <div class="stat-row">
+                                    <span class="stat-label">Highest Package:</span>
+                                    <span class="stat-value gold-text">54.0 LPA</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Average Package:</span>
+                                    <span class="stat-value">11.5 LPA</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Placement Rate:</span>
+                                    <span class="stat-value text-success">88%</span>
+                                </div>
+                                <div class="top-recruiters">
+                                    <span>Google</span><span>Microsoft</span><span>Atlassian</span><span>TCS</span>
+                                </div>
+                            </div>
+
+                            <div class="courses-widget glass-card">
+                                <h3><i class="fa-solid fa-book"></i> Courses Offered</h3>
+                                <div class="course-tags">
+                                    <span class="tag">B.Tech</span>
+                                    <span class="tag">M.Tech</span>
+                                    <span class="tag">B.Arch</span>
+                                    <span class="tag">M.Sc</span>
+                                    <span class="tag">MBA</span>
+                                    <span class="tag">PhD</span>
+                                </div>
+                                <a href="#" class="view-more-link">Download Curriculum PDF <i class="fa-solid fa-download"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- VIEW: REGISTRATION FORM -->
+                <div id="view-registration" class="view-section d-none">
+                    <form class="registration-form glass-card" id="regForm">
+                        <div class="form-title-wrapper">
+                            <h2 class="gold-text">Semester Registration Form</h2>
+                            <p class="subtitle">For Undergraduate / Postgraduate Courses</p>
+                        </div>
+    
+                        <!-- Section 1 -->
+                        <div class="form-section">
+                            <div class="section-header">1. Personal & Academic Details</div>
+                            <div class="section-body grid-2-col">
+                                <div class="input-group">
+                                    <label>1(a). Name (in English)</label>
+                                    <input type="text" value="Aryan Behera" readonly class="readonly-input">
+                                </div>
+                                <div class="input-group">
+                                    <label>1(b). Name (in Hindi)</label>
+                                    <input type="text" placeholder="हिंदी में नाम दर्ज करें">
+                                </div>
+                                <div class="input-group">
+                                    <label>2. Department / School/Center</label>
+                                    <input type="text" value="Computer Science and Technology (CST)" readonly class="readonly-input">
+                                </div>
+                                <div class="input-group">
+                                    <label>3. Programme</label>
+                                    <select class="glass-input">
+                                        <option value="B.Tech" selected>B.Tech.</option>
+                                        <option value="M.Tech">M.Tech.</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>4. Specialization (if any for PG)</label>
+                                    <input type="text" placeholder="Enter specialization or N/A" class="glass-input">
+                                </div>
+                                <div class="input-group">
+                                    <label>5. Registration for Semester</label>
+                                    <select class="glass-input">
+                                        <option value="3" selected>3rd Semester</option>
+                                        <option value="4">4th Semester</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>6. Enrolment No</label>
+                                    <input type="text" value="2025CSB120" readonly class="readonly-input">
+                                </div>
+                                <div class="input-group">
+                                    <label>7. G-suite ID</label>
+                                    <input type="email" value="2025csb120.aryan@students.iiests.ac.in" readonly class="readonly-input">
+                                </div>
+                                <div class="input-group">
+                                    <label>8. Mobile No.</label>
+                                    <input type="tel" placeholder="Enter 10-digit mobile number" class="glass-input">
+                                </div>
+                            </div>
+                        </div>
+    
+                        <!-- Section 2 -->
+                        <div class="form-section">
+                            <div class="section-header">2. Details of Institute Fee Payment</div>
+                            <div class="section-body grid-2-col">
+                                <div class="input-group">
+                                    <label>9(a). Amount Paid (Rs.)</label>
+                                    <input type="number" placeholder="e.g. 45000" class="glass-input">
+                                </div>
+                                <div class="input-group">
+                                    <label>9(b). Payment Date</label>
+                                    <input type="date" class="glass-input">
+                                </div>
+                            </div>
+                        </div>
+    
+                        <!-- Section 3: Theory -->
+                        <div class="form-section">
+                            <div class="section-header">3. Subject Details (Theory)</div>
+                            <div class="section-body table-responsive">
+                                <table class="glass-table" id="theoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl. No</th>
+                                            <th>Subject Code</th>
+                                            <th>Name of the Subject (Theory)</th>
+                                            <th>Core/Elective</th>
+                                            <th>Credit</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Populated via JS -->
+                                    </tbody>
+                                </table>
+                                <button type="button" class="add-row-btn" onclick="addRow('theoryTable')"><i class="fa-solid fa-plus"></i> Add Row</button>
+                            </div>
+                        </div>
+
+                        <!-- Declarations -->
+                        <div class="declaration-box">
+                            <label class="checkbox-container">
+                                <input type="checkbox" required>
+                                I declare that the information provided is correct. I have carefully scrutinized the entered subjects.
+                            </label>
+                        </div>
+    
+                        <div class="form-actions">
+                            <button type="submit" class="submit-btn">Submit Application</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- VIEW: HISTORY -->
+                <div id="view-history" class="view-section d-none">
+                    <div class="welcome-banner glass-card">
+                        <h2 class="gold-text">Registration History</h2>
+                        <p>No previous registration history found for this enrolment number.</p>
+                    </div>
+                </div>
+
+                <!-- VIEW: SETTINGS -->
+                <div id="view-settings" class="view-section d-none">
+                    <div class="welcome-banner glass-card">
+                        <h2 class="gold-text">Account Settings</h2>
+                        <p>Manage your profile, password, and notification preferences here.</p>
+                        <button class="submit-btn" style="margin-top: 20px; max-width: 250px;">Change Password</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                © 2026 Indian Institute of Engineering Science and Technology, Shibpur
+            </footer>
+        </main>
+    </div>
+
+    <!-- ==========================================
+                FLOATING AI ASSISTANT
+    =========================================== -->
+    <button class="fab-ai-btn" id="aiToggleBtn" title="Ask AI Assistant">
+        <i class="fa-solid fa-robot"></i>
+    </button>
+
+    <div class="ai-chat-window glass-panel d-none" id="aiChatWindow">
+        <div class="ai-chat-header">
+            <div class="ai-header-info">
+                <i class="fa-solid fa-robot gold-text"></i>
+                <h3>IIEST Helper AI</h3>
+            </div>
+            <button class="close-chat-btn" id="aiCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="ai-chat-body">
+            <div class="chat-message ai-message">
+                Hello Aryan! I am your IIEST academic assistant. Do you need help filling out your registration form or finding course codes?
+            </div>
+            <!-- Future messages inject here -->
+        </div>
+        <div class="ai-chat-footer">
+            <input type="text" placeholder="Type your question..." class="glass-input">
+            <button class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

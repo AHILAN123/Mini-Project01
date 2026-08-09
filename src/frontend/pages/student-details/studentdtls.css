@@ -1,0 +1,1486 @@
+/* =========================================
+   STUDENT DETAILS
+   ========================================= */
+
+
+/* =========================================
+   GOOGLE FONT
+   ========================================= */
+
+@import url(
+    'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap'
+);
+
+
+/* =========================================
+   RESET
+   ========================================= */
+
+* {
+
+    margin: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================
+   BODY
+   ========================================= */
+
+body {
+
+    width: 100%;
+
+    min-height: 100vh;
+
+    font-family: 'Poppins', sans-serif;
+
+    overflow: hidden;
+
+}
+
+
+/* =========================================
+   MAIN PAGE
+   ========================================= */
+
+.page-container {
+
+    width: 100%;
+
+    height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    position: relative;
+
+    background-image: url("bg1.jpg");
+
+    background-size: cover;
+
+    background-position: center;
+
+    background-repeat: no-repeat;
+
+}
+
+
+/* =========================================
+   BACKGROUND OVERLAY
+   ========================================= */
+
+.page-container::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        rgba(0, 0, 0, 0.42);
+
+    backdrop-filter:
+        blur(7px);
+
+    -webkit-backdrop-filter:
+        blur(7px);
+
+    z-index: 0;
+
+}
+
+
+/* =========================================
+   MAIN WINDOW
+   ========================================= */
+
+.student-details-box {
+
+    position: relative;
+
+    z-index: 1;
+
+    width: 520px;
+
+    height: 560px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background:
+        rgba(255, 255, 255, 0.97);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.75);
+
+    border-radius: 28px;
+
+    box-shadow:
+        0 20px 50px
+        rgba(0, 0, 0, 0.35);
+
+}
+
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+.window-header {
+
+    flex-shrink: 0;
+
+    padding:
+        32px 42px 20px;
+
+}
+
+
+.student-details-box h1 {
+
+    text-align: center;
+
+    color: #222222;
+
+    font-family:
+        'Poppins',
+        sans-serif;
+
+    font-size: 30px;
+
+    font-weight: 700;
+
+    line-height: 1.15;
+
+}
+
+
+/* =========================================
+   SCROLLABLE FORM AREA
+   ========================================= */
+
+.form-scroll-area {
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding:
+        0 42px 20px;
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+        #d4af37
+        transparent;
+
+}
+
+
+/* =========================================
+   FORM SCROLLBAR
+   ========================================= */
+
+.form-scroll-area::-webkit-scrollbar {
+
+    width: 6px;
+
+}
+
+
+.form-scroll-area::-webkit-scrollbar-track {
+
+    background:
+        transparent;
+
+}
+
+
+.form-scroll-area::-webkit-scrollbar-thumb {
+
+    background:
+        #d4af37;
+
+    border-radius:
+        10px;
+
+}
+
+
+/* =========================================
+   FORM
+   ========================================= */
+
+#student-details-form {
+
+    width: 100%;
+
+}
+
+
+/* =========================================
+   FORM SECTION
+   ========================================= */
+
+.form-section {
+
+    width: 100%;
+
+    margin-bottom: 18px;
+
+}
+
+
+/* =========================================
+   LABEL
+   ========================================= */
+
+.form-section label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #292929;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+}
+
+
+/* =========================================
+   NORMAL INPUT
+   ========================================= */
+
+.input-wrapper {
+
+    width: 100%;
+
+    height: 58px;
+
+    display: flex;
+
+    align-items: center;
+
+    background:
+        #f7f7f7;
+
+    border:
+        1px solid
+        #d6d6d6;
+
+    border-radius:
+        17px;
+
+    transition:
+        all 0.25s ease;
+
+}
+
+
+.input-wrapper:focus-within {
+
+    border-color:
+        #d4af37;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(212, 175, 55, 0.15);
+
+}
+
+
+.input-wrapper input {
+
+    width: 100%;
+
+    height: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background:
+        transparent;
+
+    padding:
+        0 17px;
+
+    color:
+        #333333;
+
+    font-family:
+        'Poppins',
+        sans-serif;
+
+    font-size:
+        14px;
+
+}
+
+
+.input-wrapper input::placeholder {
+
+    color:
+        #9a9a9a;
+
+}
+
+
+/* =========================================
+   ENROLLMENT ID
+   ========================================= */
+
+.readonly-wrapper {
+
+    background:
+        #eeeeee;
+
+}
+
+
+.readonly-wrapper input {
+
+    color:
+        #666666;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+/* =========================================
+   PASSWORD WRAPPER
+   ========================================= */
+
+.password-wrapper {
+
+    width: 100%;
+
+    height: 58px;
+
+    display: flex;
+
+    align-items: center;
+
+    position: relative;
+
+    background:
+        #f7f7f7;
+
+    border:
+        1px solid
+        #d6d6d6;
+
+    border-radius:
+        17px;
+
+    transition:
+        all 0.25s ease;
+
+}
+
+
+.password-wrapper:focus-within {
+
+    border-color:
+        #d4af37;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(212, 175, 55, 0.15);
+
+}
+
+
+.password-wrapper input {
+
+    width: 100%;
+
+    height: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background:
+        transparent;
+
+    padding:
+        0 85px 0 17px;
+
+    color:
+        #333333;
+
+    font-family:
+        'Poppins',
+        sans-serif;
+
+    font-size:
+        14px;
+
+}
+
+
+.password-wrapper input::placeholder {
+
+    color:
+        #9a9a9a;
+
+}
+
+
+/* =========================================
+   PASSWORD TOGGLE
+   ========================================= */
+
+.password-toggle {
+
+    position: absolute;
+
+    right: 15px;
+
+    top: 50%;
+
+    transform:
+        translateY(-50%);
+
+    width: 30px;
+
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    background:
+        transparent;
+
+    color:
+        #777777;
+
+    cursor:
+        pointer;
+
+    padding: 0;
+
+}
+
+
+.password-toggle:hover {
+
+    color:
+        #9b7910;
+
+}
+
+
+/* =========================================
+   PASSWORD ICONS
+   ========================================= */
+
+.eye-icon,
+.eye-slash-icon {
+
+    width: 20px;
+
+    height: 20px;
+
+}
+
+
+.eye-slash-icon {
+
+    display:
+        none;
+
+}
+
+
+.password-toggle.show-password
+.eye-icon {
+
+    display:
+        none;
+
+}
+
+
+.password-toggle.show-password
+.eye-slash-icon {
+
+    display:
+        block;
+
+}
+
+
+/* =========================================
+   PASSWORD MATCH CHECK
+   ========================================= */
+
+.password-match-check {
+
+    position: absolute;
+
+    right: 50px;
+
+    top: 50%;
+
+    transform:
+        translateY(-50%)
+        scale(0.7);
+
+    width: 23px;
+
+    height: 23px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius:
+        50%;
+
+    background:
+        #28a745;
+
+    color:
+        white;
+
+    font-size:
+        14px;
+
+    font-weight:
+        700;
+
+    opacity:
+        0;
+
+    visibility:
+        hidden;
+
+    transition:
+        all 0.2s ease;
+
+}
+
+
+.password-match-check.visible {
+
+    opacity:
+        1;
+
+    visibility:
+        visible;
+
+    transform:
+        translateY(-50%)
+        scale(1);
+
+}
+
+
+/* =========================================
+   PASSWORD MESSAGE
+   ========================================= */
+
+.password-message {
+
+    min-height:
+        15px;
+
+    margin-top:
+        5px;
+
+    padding-left:
+        3px;
+
+    color:
+        #d9534f;
+
+    font-size:
+        10px;
+
+}
+
+
+/* =========================================
+   CUSTOM SELECT
+   ========================================= */
+
+.custom-select {
+
+    position:
+        relative;
+
+    width:
+        100%;
+
+}
+
+
+/* =========================================
+   SELECT DISPLAY
+   ========================================= */
+
+.select-display {
+
+    width:
+        100%;
+
+    height:
+        58px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 17px;
+
+    border:
+        1px solid
+        #d6d6d6;
+
+    border-radius:
+        17px;
+
+    background:
+        #f7f7f7;
+
+    color:
+        #333333;
+
+    font-family:
+        'Poppins',
+        sans-serif;
+
+    font-size:
+        14px;
+
+    cursor:
+        pointer;
+
+    text-align:
+        left;
+
+    transition:
+        all 0.25s ease;
+
+}
+
+
+.select-display:hover,
+.custom-select.open .select-display {
+
+    border-color:
+        #d4af37;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(212, 175, 55, 0.15);
+
+}
+
+
+/* =========================================
+   SELECT ARROW
+   ========================================= */
+
+.select-arrow {
+
+    font-size:
+        12px;
+
+    transition:
+        transform 0.2s ease;
+
+}
+
+
+.custom-select.open
+.select-arrow {
+
+    transform:
+        rotate(180deg);
+
+}
+
+
+/* =========================================
+   DROPDOWN MENU
+   ========================================= */
+
+.select-menu {
+
+    display:
+        none;
+
+    position:
+        absolute;
+
+    left:
+        0;
+
+    right:
+        0;
+
+    top:
+        calc(100% + 6px);
+
+    z-index:
+        20;
+
+    max-height:
+        220px;
+
+    overflow-y:
+        auto;
+
+    padding:
+        6px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid
+        #d6d6d6;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 12px 28px
+        rgba(0, 0, 0, 0.18);
+
+    scrollbar-width:
+        thin;
+
+    scrollbar-color:
+        #d4af37
+        #f5f5f5;
+
+}
+
+
+/* =========================================
+   DROPDOWN SCROLLBAR
+   ========================================= */
+
+.select-menu::-webkit-scrollbar {
+
+    width:
+        6px;
+
+}
+
+
+.select-menu::-webkit-scrollbar-track {
+
+    background:
+        #f5f5f5;
+
+    border-radius:
+        10px;
+
+}
+
+
+.select-menu::-webkit-scrollbar-thumb {
+
+    background:
+        #d4af37;
+
+    border-radius:
+        10px;
+
+}
+
+
+/* =========================================
+   SHOW DROPDOWN
+   ========================================= */
+
+.custom-select.open
+.select-menu {
+
+    display:
+        block;
+
+}
+
+
+/* =========================================
+   DROPDOWN OPTION
+   ========================================= */
+
+.select-option {
+
+    width:
+        100%;
+
+    min-height:
+        45px;
+
+    padding:
+        10px 12px;
+
+    border:
+        none;
+
+    border-radius:
+        9px;
+
+    background:
+        transparent;
+
+    color:
+        #333333;
+
+    font-family:
+        'Poppins',
+        sans-serif;
+
+    font-size:
+        13px;
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.2s ease;
+
+}
+
+
+.select-option:hover {
+
+    background:
+        rgba(212, 175, 55, 0.13);
+
+}
+
+
+.select-option.selected {
+
+    background:
+        rgba(212, 175, 55, 0.20);
+
+    color:
+        #806500;
+
+    font-weight:
+        600;
+
+}
+
+
+/* =========================================
+   DISABLED DEPARTMENT
+   ========================================= */
+
+.disabled-select
+.select-display {
+
+    background:
+        #eeeeee;
+
+    color:
+        #9a9a9a;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+.disabled-select
+.select-display:hover {
+
+    border-color:
+        #d6d6d6;
+
+    box-shadow:
+        none;
+
+}
+
+
+/* =========================================
+   FIELD NOTE
+   ========================================= */
+
+.field-note {
+
+    margin-top:
+        5px;
+
+    padding-left:
+        3px;
+
+    color:
+        #888888;
+
+    font-size:
+        10px;
+
+    line-height:
+        1.4;
+
+}
+
+
+/* =========================================
+   FIXED NAVIGATION FOOTER
+   ========================================= */
+
+.navigation-footer {
+
+    flex-shrink:
+        0;
+
+    width:
+        100%;
+
+    min-height:
+        88px;
+
+    padding:
+        18px 42px;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    background:
+        rgba(255, 255, 255, 0.98);
+
+    border-top:
+        1px solid
+        rgba(0, 0, 0, 0.08);
+
+}
+
+
+/* =========================================
+   BACK BUTTON
+   ========================================= */
+
+.back-btn {
+
+    width:
+        120px;
+
+    height:
+        52px;
+
+    border:
+        1px solid
+        rgba(212, 175, 55, 0.5);
+
+    border-radius:
+        15px;
+
+    background:
+        rgba(212, 175, 55, 0.12);
+
+    color:
+        #9b7910;
+
+    font-family:
+        'Poppins',
+        sans-serif;
+
+    font-size:
+        16px;
+
+    font-weight:
+        600;
+
+    cursor:
+        pointer;
+
+    transition:
+        all 0.25s ease;
+
+}
+
+
+.back-btn:hover {
+
+    background:
+        #d4af37;
+
+    color:
+        white;
+
+    transform:
+        translateX(-2px);
+
+}
+
+
+/* =========================================
+   CONTINUE BUTTON
+   ========================================= */
+
+.continue-btn {
+
+    width:
+        120px;
+
+    height:
+        52px;
+
+    border:
+        1px solid
+        #d4af37;
+
+    border-radius:
+        15px;
+
+    background:
+        #d4af37;
+
+    color:
+        white;
+
+    font-family:
+        'Poppins',
+        sans-serif;
+
+    font-size:
+        16px;
+
+    font-weight:
+        600;
+
+    cursor:
+        pointer;
+
+    box-shadow:
+        0 5px 14px
+        rgba(0, 0, 0, 0.14);
+
+    transition:
+        all 0.25s ease;
+
+}
+
+
+.continue-btn:hover {
+
+    background:
+        #c29d22;
+
+    border-color:
+        #c29d22;
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 18px
+        rgba(0, 0, 0, 0.18);
+
+}
+
+
+.continue-btn:active {
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* =========================================
+   SUCCESS OVERLAY
+   ========================================= */
+
+.success-overlay {
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        9999;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        rgba(0, 0, 0, 0.55);
+
+    backdrop-filter:
+        blur(7px);
+
+    -webkit-backdrop-filter:
+        blur(7px);
+
+}
+
+
+/* =========================================
+   SUCCESS POPUP
+   ========================================= */
+
+.success-popup {
+
+    width:
+        390px;
+
+    padding:
+        35px 30px;
+
+    text-align:
+        center;
+
+    background:
+        #ffffff;
+
+    border-radius:
+        24px;
+
+    box-shadow:
+        0 20px 50px
+        rgba(0, 0, 0, 0.30);
+
+    animation:
+        successPopupIn
+        0.3s ease;
+
+}
+
+
+/* =========================================
+   SUCCESS ICON
+   ========================================= */
+
+.success-icon {
+
+    width:
+        65px;
+
+    height:
+        65px;
+
+    margin:
+        0 auto 18px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        50%;
+
+    background:
+        #28a745;
+
+    color:
+        #ffffff;
+
+    font-size:
+        34px;
+
+    font-weight:
+        700;
+
+}
+
+
+/* =========================================
+   SUCCESS HEADING
+   ========================================= */
+
+.success-popup h2 {
+
+    margin-bottom:
+        12px;
+
+    color:
+        #222222;
+
+    font-size:
+        21px;
+
+    font-weight:
+        600;
+
+}
+
+
+/* =========================================
+   SUCCESS TEXT
+   ========================================= */
+
+.success-popup p {
+
+    margin-bottom:
+        10px;
+
+    color:
+        #444444;
+
+    font-size:
+        15px;
+
+}
+
+
+/* =========================================
+   REDIRECT MESSAGE
+   ========================================= */
+
+.success-popup
+.redirect-message {
+
+    margin-top:
+        18px;
+
+    margin-bottom:
+        0;
+
+    color:
+        #888888;
+
+    font-size:
+        12px;
+
+}
+
+
+.redirect-message span {
+
+    color:
+        #9b7910;
+
+    font-weight:
+        700;
+
+}
+
+
+/* =========================================
+   SUCCESS ANIMATION
+   ========================================= */
+
+@keyframes successPopupIn {
+
+    from {
+
+        opacity:
+            0;
+
+        transform:
+            scale(0.90)
+            translateY(10px);
+
+    }
+
+    to {
+
+        opacity:
+            1;
+
+        transform:
+            scale(1)
+            translateY(0);
+
+    }
+
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+    .student-details-box {
+
+        width:
+            90%;
+
+        height:
+            560px;
+
+        border-radius:
+            24px;
+
+    }
+
+
+    .window-header {
+
+        padding:
+            28px 30px 20px;
+
+    }
+
+
+    .form-scroll-area {
+
+        padding:
+            0 30px 20px;
+
+    }
+
+
+    .navigation-footer {
+
+        padding:
+            16px 30px;
+
+    }
+
+
+    .student-details-box h1 {
+
+        font-size:
+            28px;
+
+    }
+
+}
+
+
+@media (max-width: 450px) {
+
+    .student-details-box {
+
+        width:
+            94%;
+
+        height:
+            560px;
+
+    }
+
+
+    .window-header {
+
+        padding:
+            24px 20px 18px;
+
+    }
+
+
+    .form-scroll-area {
+
+        padding:
+            0 20px 20px;
+
+    }
+
+
+    .navigation-footer {
+
+        min-height:
+            80px;
+
+        padding:
+            14px 20px;
+
+    }
+
+
+    .student-details-box h1 {
+
+        font-size:
+            25px;
+
+    }
+
+
+    .input-wrapper,
+    .password-wrapper,
+    .select-display {
+
+        height:
+            54px;
+
+    }
+
+
+    .back-btn,
+    .continue-btn {
+
+        width:
+            105px;
+
+        height:
+            48px;
+
+        font-size:
+            14px;
+
+    }
+
+
+    .success-popup {
+
+        width:
+            88%;
+
+        padding:
+            30px 22px;
+
+    }
+
+}

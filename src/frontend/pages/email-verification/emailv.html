@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Student Email Verification</title>
+
+    <!-- Poppins Font -->
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="emailv.css">
+
+</head>
+
+
+<body>
+
+    <div class="page-container">
+
+        <main class="verification-container">
+
+
+            <!-- Back Button -->
+
+            <button
+                type="button"
+                class="back-btn"
+                onclick="goBack()">
+
+                &lt; Back
+
+            </button>
+
+
+            <!-- Main Heading -->
+
+            <h1 id="create-account-title">
+
+                Create Account
+
+            </h1>
+
+
+            <!-- ==========================
+                 EMAIL SECTION
+                 ========================== -->
+
+            <div id="email-section">
+
+                <label for="student-email">
+
+                    Student Email
+
+                </label>
+
+
+                <input
+                    type="email"
+                    id="student-email"
+                    placeholder="2026xyz001.thor@students.iiests.ac.in"
+                    autocomplete="off"
+                >
+
+
+                <button
+                    type="button"
+                    class="main-btn"
+                    id="send-otp-btn"
+                    onclick="sendOTP()">
+
+                    Send OTP
+
+                </button>
+
+            </div>
+
+
+            <!-- ==========================
+                 OTP SECTION
+                 ========================== -->
+
+            <div id="otp-section">
+
+                <label for="otp">
+
+                    Enter OTP
+
+                </label>
+
+
+                <div class="otp-input-wrapper">
+
+                    <input
+                        type="text"
+                        id="otp"
+                        maxlength="6"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                    >
+
+                    <span id="otp-placeholder">
+
+                        Enter OTP...
+
+                    </span>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="main-btn"
+                    onclick="verifyOTP()">
+
+                    Verify OTP
+
+                </button>
+
+
+                <p
+                    class="resend-text"
+                    id="resend-text">
+
+                    Didn't receive the OTP?
+
+                </p>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- JavaScript -->
+    <script src="emailv.js"></script>
+
+</body>
+
+</html>

@@ -3,21 +3,36 @@
 ==================================================*/
 
 /*==============================
-        THEME VARIABLES 
+        THEME VARIABLES (Light Default)
 ==============================*/
 :root {
-    /* Base Brand Colors (Constant) */
+    /* Base Brand Colors */
     --primary: #D4AF37;
-    --primary-light: #E6C768;
+    --primary-light: #C5A028;
     --primary-dark: #A67C00;
-    --success: #4ade80;
-    --warning: #fbbf24;
+    --success: #16a34a;
+    --warning: #d97706;
     
-    /* Dark Theme (Default) */
+    /* Light Theme (Default) */
+    --text-main: #1E293B;
+    --text-muted: #475569;
+    --glass-bg: rgba(255,255,255,1); /*.7*/ 
+    --glass-card-bg: rgba(255,255,255,1);/*.6*/
+    --glass-border: rgba(0,0,0,.1);
+    --panel-overlay: linear-gradient(rgba(241, 245, 249, 0.85), rgba(248, 250, 252, 0.95));
+    --input-bg: rgba(255,255,255,.8);
+    --input-border: rgba(0,0,0,.15);
+    --body-bg: #f9f9f9;
+    --shadow: 0 15px 35px rgba(0,0,0,.1);
+    --hover-bg: rgba(0,0,0,.05);
+}
+
+[data-theme="dark"] {
+    /* Dark Theme Overrides */
     --text-main: #F8F9FA;
     --text-muted: #D8D8D8;
-    --glass-bg: rgba(255,255,255,.05);
-    --glass-card-bg: rgba(0,0,0,.25);
+    --glass-bg: rgba(255,255,255,.05); /*.05*/
+    --glass-card-bg: rgba(20, 17, 17, 0.7); /*.25*/
     --glass-border: rgba(255,255,255,.12);
     --panel-overlay: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.96));
     --input-bg: rgba(0,0,0,.3);
@@ -25,23 +40,8 @@
     --body-bg: #090E17;
     --shadow: 0 25px 50px rgba(0,0,0,.5);
     --hover-bg: rgba(255,255,255,.08);
-}
-
-[data-theme="light"] {
-    /* Light Theme Overrides */
-    --text-main: #1E293B;
-    --text-muted: #475569;
-    --glass-bg: rgba(255,255,255,.7);
-    --glass-card-bg: rgba(255,255,255,.6);
-    --glass-border: rgba(0,0,0,.1);
-    --panel-overlay: linear-gradient(rgba(241, 245, 249, 0.85), rgba(248, 250, 252, 0.95));
-    --input-bg: rgba(255,255,255,.8);
-    --input-border: rgba(0,0,0,.15);
-    --body-bg: #CBD5E1;
-    --shadow: 0 15px 35px rgba(0,0,0,.1);
-    --hover-bg: rgba(0,0,0,.05);
-    --success: #16a34a;
-    --warning: #d97706;
+    --success: #4ade80;
+    --warning: #fbbf24;
 }
 
 /*==============================
@@ -78,7 +78,7 @@ body {
     REUSABLE PARALLAX GLASS
 ==============================*/
 .glass-panel {
-    background-image: var(--panel-overlay), url('../../assets/images/bg1.jpg');
+    background-image: var(--panel-overlay), url('../../assets/images/bg4.png');
     background-attachment: fixed;
     background-size: cover;
     background-position: center;
@@ -96,24 +96,37 @@ body {
     padding: 24px;
 }
 
+/* Solid card for the topbar so it has NO background image */
+.solid-card {
+    background: var(--glass-card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
 /*==============================
-            SIDEBAR
+        SIDEBAR (Clean Solid/Glass, No Doodles/Image)
 ==============================*/
 .sidebar {
     width: 280px;
     display: flex;
     flex-direction: column;
     padding: 24px 20px;
+    
+    /* Override background to make it solid/clean without the doodle texture or image */
+    background-image: none !important;
+    background-color: var(--glass-bg); 
 }
 
 .sidebar-header {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 12px;
     margin-bottom: 40px;
 }
 
-.sidebar-logo { width: 45px; }
 .sidebar-header h2 { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
 
 .sidebar-nav {
@@ -138,7 +151,7 @@ body {
 
 .nav-item i { width: 20px; text-align: center; }
 .nav-item:hover { background: var(--hover-bg); color: var(--text-main); }
-.nav-item.active { background: rgba(212,175,55,.15); color: var(--primary-dark); border-color: rgba(212,175,55,.3); }
+.nav-item.active { background: rgba(212,175,55,.5); /*.15*/ color: var(--primary-dark); border-color: rgba(212,175,55,.3); }
 
 [data-theme="dark"] .nav-item.active { color: var(--primary-light); }
 
@@ -166,10 +179,12 @@ body {
     flex: 1; display: flex; flex-direction: column; gap: 20px; overflow: hidden;
 }
 
+/*==============================
+        TOPBAR & BANNER
+==============================*/
 .topbar {
-    display: flex; justify-content: space-between; align-items: center; padding: 18px 30px;
+    display: flex; justify-content: space-between; align-items: center; padding: 15px 30px;
 }
-.page-title { font-size: 1.3rem; font-weight: 600; }
 
 .topbar-actions { display: flex; gap: 12px; }
 .action-btn {
@@ -179,6 +194,40 @@ body {
 }
 .action-btn:hover { background: var(--hover-bg); border-color: var(--primary); color: var(--primary-dark); }
 
+.page-title { font-size: 1.3rem; font-weight: 600; padding: 0 10px; }
+
+.institute-banner-top {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.institute-logo {
+    width: 75px;
+    height: auto;
+    flex-shrink: 0;
+}
+
+.institute-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.lang-text { font-weight: 600; color: var(--text-main); line-height: 1.2; }
+.lang-text.bn, .lang-text.hi { font-size: 1rem; }
+.lang-text.en { font-size: 1.05rem; color: var(--primary-dark); letter-spacing: 0.5px; }
+
+[data-theme="dark"] .lang-text.en { color: var(--primary-light); }
+
+.sub-text { font-size: 0.75rem; color: var(--text-muted); }
+.sub-text.blue { color: #2B4C7E; font-weight: 600; }
+[data-theme="dark"] .sub-text.blue { color: #60A5FA; }
+.sub-text.italic { font-style: italic; opacity: 0.85; }
+
+/*==============================
+        CONTENT AREA
+==============================*/
 .content-area {
     flex: 1; padding: 30px; overflow-y: auto; position: relative;
 }
@@ -198,7 +247,7 @@ body {
 }
 
 .home-main-col, .home-side-col { display: flex; flex-direction: column; gap: 24px; }
-.welcome-banner p { color: var(--text-muted); line-height: 1.6; }
+.greeting-box p { color: var(--text-muted); line-height: 1.6; }
 
 .status-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .status-card { text-align: center; padding: 20px 15px; }
@@ -306,7 +355,7 @@ footer { text-align: center; color: var(--text-muted); font-size: 12px; padding-
     display: flex;
     flex-direction: column;
     z-index: 99;
-    background-image: var(--panel-overlay), url('../../assets/images/bg1.jpg'); /* Parallax match */
+    background-image: var(--panel-overlay), url('../../assets/images/bg2.jpeg');
     transform-origin: bottom right;
     animation: scaleUp 0.3s ease;
 }
@@ -381,4 +430,5 @@ footer { text-align: center; color: var(--text-muted); font-size: 12px; padding-
 
 @media(max-width: 992px) {
     .home-grid { grid-template-columns: 1fr; }
+    .institute-banner-top { flex-direction: column; gap: 10px; text-align: center; }
 }

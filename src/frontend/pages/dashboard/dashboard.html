@@ -29,8 +29,7 @@
         =========================================== -->
         <aside class="sidebar glass-panel">
             <div class="sidebar-header">
-                <img src="../../assets/images/logo.png" alt="IIEST Logo" class="sidebar-logo">
-                <h2>IIEST Shibpur</h2>
+                <h2><i class="fa-solid fa-table-columns" style="margin-right: 8px;"></i> Dashboard</h2>
             </div>
 
             <nav class="sidebar-nav">
@@ -67,12 +66,29 @@
         =========================================== -->
         <main class="main-content">
             
-            <!-- Topbar -->
-            <header class="topbar glass-panel">
-                <h1 class="page-title" id="pageTitle">Home</h1>
+            <!-- Topbar (Now a clean solid card instead of image cutout) -->
+            <header class="topbar solid-card">
+                <div class="topbar-left">
+                    
+                    <!-- Institute Banner (Shown ONLY on Home Page) -->
+                    <div class="institute-banner-top" id="homeBanner">
+                        <img src="../../assets/images/logo.png" alt="IIEST Logo" class="institute-logo" id="instituteLogo">
+                        <div class="institute-text">
+                            <div class="lang-text bn">ভারতীয় প্রকৌশল বিজ্ঞান এবং প্রযুক্তিবিদ্যা প্রতিষ্ঠান, শিবপুর</div>
+                            <div class="lang-text hi">भारतीय अभियांत्रिकी विज्ञान एवं प्रौद्योगिकी संस्थान, शिवपुर</div>
+                            <div class="lang-text en">INDIAN INSTITUTE OF ENGINEERING SCIENCE AND TECHNOLOGY, SHIBPUR</div>
+                            <div class="sub-text blue">Erstwhile B.E. College, Estd. 1856</div>
+                            <div class="sub-text italic">An Institute of National Importance under Ministry of Education, Government of India</div>
+                        </div>
+                    </div>
+
+                    <!-- Standard Page Title (Shown on all OTHER pages) -->
+                    <h1 class="page-title d-none" id="pageTitle">Registration Form</h1>
+                </div>
+
                 <div class="topbar-actions">
                     <button class="action-btn" id="themeToggle" title="Toggle Light/Dark Mode">
-                        <i class="fa-solid fa-sun" id="themeIcon"></i>
+                        <i class="fa-solid fa-moon" id="themeIcon"></i>
                     </button>
                     <button class="action-btn">
                         <i class="fa-solid fa-circle-info"></i> Help
@@ -89,7 +105,8 @@
                     <div class="home-grid">
                         <!-- Main Left Column -->
                         <div class="home-main-col">
-                            <div class="welcome-banner glass-card">
+                            
+                            <div class="greeting-box glass-card">
                                 <h2 class="gold-text">Welcome back, Aryan!</h2>
                                 <p>The semester registration portal is currently open. Ensure all your fee dues are cleared before generating your registration draft.</p>
                             </div>
@@ -127,7 +144,7 @@
                                         </div>
                                     </div>
                                     <div class="news-item">
-                                        <div class="news-img" style="background-color: #294370; display:flex; align-items:center; justify-content:center; color:white;"><i class="fa-solid fa-graduation-cap fa-2x"></i></div>
+                                        <div class="news-img" style="background-color: var(--primary-dark); display:flex; align-items:center; justify-content:center; color:white;"><i class="fa-solid fa-graduation-cap fa-2x"></i></div>
                                         <div class="news-content">
                                             <h4>Convocation 2026 Guidelines</h4>
                                             <p>Registration for the upcoming annual convocation is now live. Please verify your details.</p>
@@ -287,7 +304,7 @@
 
                 <!-- VIEW: HISTORY -->
                 <div id="view-history" class="view-section d-none">
-                    <div class="welcome-banner glass-card">
+                    <div class="greeting-box glass-card">
                         <h2 class="gold-text">Registration History</h2>
                         <p>No previous registration history found for this enrolment number.</p>
                     </div>
@@ -295,7 +312,7 @@
 
                 <!-- VIEW: SETTINGS -->
                 <div id="view-settings" class="view-section d-none">
-                    <div class="welcome-banner glass-card">
+                    <div class="greeting-box glass-card">
                         <h2 class="gold-text">Account Settings</h2>
                         <p>Manage your profile, password, and notification preferences here.</p>
                         <button class="submit-btn" style="margin-top: 20px; max-width: 250px;">Change Password</button>
@@ -330,7 +347,6 @@
             <div class="chat-message ai-message">
                 Hello Aryan! I am your IIEST academic assistant. Do you need help filling out your registration form or finding course codes?
             </div>
-            <!-- Future messages inject here -->
         </div>
         <div class="ai-chat-footer">
             <input type="text" placeholder="Type your question..." class="glass-input">

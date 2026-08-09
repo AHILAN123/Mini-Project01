@@ -1,24 +1,28 @@
 /*==================================================
-        THEME TOGGLE (DARK / LIGHT MODE)
+        THEME TOGGLE (DARK / LIGHT MODE & LOGO SWAP)
 ==================================================*/
 const themeToggleBtn = document.getElementById("themeToggle");
 const themeIcon = document.getElementById("themeIcon");
 const rootHtml = document.documentElement;
+const instituteLogo = document.getElementById("instituteLogo");
 
-// Set default theme state explicitly
-rootHtml.setAttribute("data-theme", "dark");
+// Set default theme state explicitly (Light Mode)
+rootHtml.setAttribute("data-theme", "light");
+if (instituteLogo) instituteLogo.src = "../../assets/images/logo.png";
 
 themeToggleBtn.addEventListener("click", () => {
     let currentTheme = rootHtml.getAttribute("data-theme");
     
-    if(currentTheme === "dark") {
-        rootHtml.setAttribute("data-theme", "light");
-        themeIcon.classList.remove("fa-sun");
-        themeIcon.classList.add("fa-moon");
-    } else {
+    if(currentTheme === "light") {
         rootHtml.setAttribute("data-theme", "dark");
         themeIcon.classList.remove("fa-moon");
         themeIcon.classList.add("fa-sun");
+        if (instituteLogo) instituteLogo.src = "../../assets/images/logo_white.png";
+    } else {
+        rootHtml.setAttribute("data-theme", "light");
+        themeIcon.classList.remove("fa-sun");
+        themeIcon.classList.add("fa-moon");
+        if (instituteLogo) instituteLogo.src = "../../assets/images/logo.png";
     }
 });
 
@@ -43,6 +47,7 @@ aiCloseBtn.addEventListener("click", () => {
 const navItems = document.querySelectorAll(".nav-item");
 const views = document.querySelectorAll(".view-section");
 const pageTitle = document.getElementById("pageTitle");
+const homeBanner = document.getElementById("homeBanner");
 
 navItems.forEach(item => {
     item.addEventListener("click", (e) => {
@@ -52,12 +57,20 @@ navItems.forEach(item => {
         navItems.forEach(link => link.classList.remove("active"));
         item.classList.add("active");
 
-        // Update Topbar Title
-        const linkText = item.querySelector("span").textContent;
-        pageTitle.innerText = linkText;
+        const targetId = item.getAttribute("data-target");
+
+        // Topbar Title / Banner Logic
+        if (targetId === "view-home") {
+            homeBanner.classList.remove("d-none");
+            pageTitle.classList.add("d-none");
+        } else {
+            homeBanner.classList.add("d-none");
+            pageTitle.classList.remove("d-none");
+            const linkText = item.querySelector("span").textContent;
+            pageTitle.innerText = linkText;
+        }
 
         // View Switching
-        const targetId = item.getAttribute("data-target");
         views.forEach(view => {
             if(view.id === targetId) {
                 view.classList.remove("d-none");

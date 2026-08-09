@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Email Verification</title>
+
+    <!-- OTP VERIFICATION CSS -->
+    <link rel="stylesheet" href="emailv.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         MAIN PAGE
+         ========================================= -->
+
+    <div class="page-container">
+
+
+        <!-- =====================================
+             MAIN WHITE VERIFICATION BOX
+             ===================================== -->
+
+        <div class="create-account-box">
+
+
+            <!-- =================================
+                 BACK BUTTON
+                 ================================= -->
+
+            <button
+                type="button"
+                class="back-btn"
+                onclick="goBack()">
+
+                &lt; Back
+
+            </button>
+
+
+
+            <!-- =================================
+                 MAIN HEADING
+                 ================================= -->
+
+            <h1>
+
+                Create<br>
+                Account
+
+            </h1>
+
+
+
+            <!-- =================================
+                 STUDENT EMAIL SECTION
+                 ================================= -->
+
+            <div
+                class="form-section"
+                id="email-section">
+
+
+                <label for="student-email">
+
+                    Student Email
+
+                </label>
+
+
+                <div class="email-wrapper">
+
+
+                    <!--
+                        STUDENT ENTERS THE COMPLETE
+                        EMAIL ADDRESS.
+
+                        Example:
+
+                        2026xyz001.thor@students.iiests.ac.in
+                    -->
+
+                    <input
+                        type="email"
+                        id="student-email"
+                        placeholder="2026xyz001.thor@students.iiests.ac.in"
+                        autocomplete="email"
+                    >
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================
+                 OTP VERIFICATION SECTION
+
+                 Initially hidden.
+
+                 It appears after a valid
+                 student email is entered.
+                 ================================= -->
+
+            <div
+                class="otp-section"
+                id="otp-section">
+
+
+                <!-- OTP LABEL -->
+
+                <label for="otp">
+
+                    Enter OTP
+
+                </label>
+
+
+
+                <!-- =================================
+                     OTP INPUT
+                     ================================= -->
+
+                <div class="otp-input-wrapper">
+
+
+                    <input
+                        type="text"
+                        id="otp"
+                        maxlength="6"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                    >
+
+
+                    <!--
+                        Custom placeholder.
+
+                        It remains visually centered,
+                        while the actual cursor starts
+                        before the placeholder text.
+                    -->
+
+                    <span
+                        class="otp-placeholder"
+                        id="otp-placeholder">
+
+                        Enter OTP...
+
+                    </span>
+
+
+                </div>
+
+
+
+                <!-- =================================
+                     VERIFY OTP BUTTON
+                     ================================= -->
+
+                <button
+                    type="button"
+                    class="verify-btn"
+                    onclick="verifyOTP()">
+
+                    Verify OTP
+
+                </button>
+
+
+
+                <!-- =================================
+                     RESEND OTP
+                     ================================= -->
+
+                <p
+                    class="resend-text"
+                    id="resend-text">
+
+                    Didn't receive the OTP?
+
+                    <button
+                        type="button"
+                        class="resend-btn"
+                        onclick="resendOTP()">
+
+                        Resend OTP
+
+                    </button>
+
+                </p>
+
+
+            </div>
+
+
+
+            <!-- =================================
+                 VERIFIED SUCCESS SECTION
+
+                 Initially hidden.
+
+                 Appears ONLY after successful
+                 OTP verification.
+                 ================================= -->
+
+            <div
+                class="verification-success"
+                id="verification-success">
+
+
+                <!-- =================================
+                     GREEN CHECK MARK
+                     ================================= -->
+
+                <div
+                    class="success-check"
+                    id="success-check">
+
+                    ✓
+
+                </div>
+
+
+
+                <!-- =================================
+                     VERIFIED HEADING
+                     ================================= -->
+
+                <h2>
+
+                    Verified!
+
+                </h2>
+
+
+
+                <!-- =================================
+                     SUCCESS MESSAGE
+                     ================================= -->
+
+                <p>
+
+                    Your student email has been
+                    verified successfully.
+
+                </p>
+
+
+
+                <!-- =================================
+                     CONTINUE BUTTON
+                     ================================= -->
+
+                <button
+                    type="button"
+                    class="continue-btn"
+                    onclick="continueToStudentDetails()">
+
+                    Continue
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- =================================
+                 SEND OTP BUTTON
+
+                 Visible when the page first opens.
+
+                 It disappears after the email
+                 is successfully validated.
+                 ================================= -->
+
+            <button
+                type="button"
+                class="send-otp-btn"
+                id="send-otp-btn"
+                onclick="sendOTP()">
+
+                Send OTP
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =========================================
+         JAVASCRIPT
+         ========================================= -->
+
+    <script src="emailv.js"></script>
+
+
+</body>
+
+</html>

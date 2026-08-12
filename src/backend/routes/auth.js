@@ -1,0 +1,314 @@
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
+
+const User = require("../models/User");
+const Otp = require("../models/Otp");
+const { requireAuth } = require("../middleware/auth");
+const { sendMail, otpEmailTemplate, tempPasswordEmailTemplate } = require("../utils/mailer");
+const { generateOtp, hashOtp, compareOtp, generateTempPassword } = require("../utils/otp");
+
+const router = express.Router();
+
+/* ==============================
+      HELPERS
+============================== */
+
+function getAllowedDomain() {
+  return (process.env.ALLOWED_EMAIL_DOMAIN || "students.iiests.ac.in").toLowerCase();
+}
+
+function isInstituteEmail(email) {
+  const domain = getAllowedDomain();
+  return typeof email === "string" && email.toLowerCase().endsWith("@" + domain);
+}
+
+function isValidEmailShape(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function signVerificationToken(email) {
+  return jwt.sign({ email, purpose: "signup" }, process.env.JWT_VERIFICATION_SECRET, {
+    expiresIn: process.env.VERIFICATION_TOKEN_EXPIRES_IN || "15m",
+  });
+}
+
+function signSessionToken(userId) {
+  return jwt.sign({ sub: userId }, process.env.JWT_SESSION_SECRET, {
+    expiresIn: process.env.SESSION_TOKEN_EXPIRES_IN || "7d",
+  });
+}
+
+// Generic rate limiter for the sensitive, email-sending endpoints so the
+// app can't be used to spam OTPs / reset emails at someone's inbox.
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 6,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests. Please wait a while before trying again." },
+});
+
+/* ==============================
+      STEP 1: SEND OTP (SIGNUP)
+============================== */
+
+router.post("/send-otp", otpLimiter, async (req, res) => {
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+
+    if (!isValidEmailShape(email)) {
+      return res.status(400).json({ error: "Enter a valid email address." });
+    }
+
+    if (!isInstituteEmail(email)) {
+      return res.status(400).json({
+        error: `Please sign up using your official @${getAllowedDomain()} email address.`,
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ error: "An account with this email already exists. Please log in instead." });
+    }
+
+    const otp = generateOtp();
+    const otpHash = await hashOtp(otp);
+    const expiresAt = new Date(Date.now() + Number(process.env.OTP_EXPIRES_MINUTES || 10) * 60 * 1000);
+
+    // Replace any previous pending OTP for this email/purpose.
+    await Otp.deleteMany({ email, purpose: "signup" });
+    await Otp.create({ email, otpHash, purpose: "signup", expiresAt });
+
+    const { subject, text, html } = otpEmailTemplate(otp);
+    await sendMail({ to: email, subject, text, html });
+
+    return res.json({ message: "OTP sent to your email." });
+  } catch (err) {
+    console.error("send-otp error:", err);
+    return res.status(500).json({ error: "Could not send OTP right now. Please try again shortly." });
+  }
+});
+
+/* ==============================
+      STEP 2: VERIFY OTP (SIGNUP)
+============================== */
+
+router.post("/verify-otp", otpLimiter, async (req, res) => {
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const otp = String(req.body.otp || "").trim();
+
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP are required." });
+    }
+
+    const record = await Otp.findOne({ email, purpose: "signup" }).sort({ createdAt: -1 });
+
+    if (!record) {
+      return res.status(400).json({ error: "No OTP found for this email. Please request a new one." });
+    }
+
+    if (record.expiresAt < new Date()) {
+      await Otp.deleteOne({ _id: record._id });
+      return res.status(400).json({ error: "This OTP has expired. Please request a new one." });
+    }
+
+    if (record.attempts >= Number(process.env.OTP_MAX_ATTEMPTS || 5)) {
+      await Otp.deleteOne({ _id: record._id });
+      return res.status(429).json({ error: "Too many incorrect attempts. Please request a new OTP." });
+    }
+
+    const isMatch = await compareOtp(otp, record.otpHash);
+
+    if (!isMatch) {
+      record.attempts += 1;
+      await record.save();
+      return res.status(400).json({ error: "Incorrect OTP. Please try again." });
+    }
+
+    // OTP is correct and consumed — delete it so it can't be reused.
+    await Otp.deleteOne({ _id: record._id });
+
+    const verificationToken = signVerificationToken(email);
+
+    return res.json({ message: "Email verified.", verificationToken });
+  } catch (err) {
+    console.error("verify-otp error:", err);
+    return res.status(500).json({ error: "Could not verify OTP right now. Please try again." });
+  }
+});
+
+/* ==============================
+      STEP 3: REGISTER
+============================== */
+
+router.post("/register", async (req, res) => {
+  try {
+    const { password, confirmPassword, fullname, mobile, verificationToken } = req.body;
+    const email = String(req.body.email || "").trim().toLowerCase();
+
+    if (!verificationToken) {
+      return res.status(400).json({ error: "Email verification is required before registering." });
+    }
+
+    let payload;
+    try {
+      payload = jwt.verify(verificationToken, process.env.JWT_VERIFICATION_SECRET);
+    } catch (err) {
+      return res.status(401).json({ error: "Verification expired. Please verify your email again." });
+    }
+
+    if (payload.purpose !== "signup" || payload.email !== email) {
+      return res.status(401).json({ error: "Verification does not match this email. Please verify again." });
+    }
+
+    if (!isInstituteEmail(email)) {
+      return res.status(400).json({ error: `Please sign up using your official @${getAllowedDomain()} email address.` });
+    }
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters." });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: "Passwords do not match." });
+    }
+
+    if (!fullname || !fullname.trim()) {
+      return res.status(400).json({ error: "Full name is required." });
+    }
+
+    if (!/^\d{10}$/.test(String(mobile || "").trim())) {
+      return res.status(400).json({ error: "Enter a valid 10-digit mobile number." });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ error: "An account with this email already exists. Please log in instead." });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await User.create({
+      email,
+      passwordHash,
+      fullname: fullname.trim(),
+      mobile: String(mobile).trim(),
+      isEmailVerified: true,
+    });
+
+    return res.status(201).json({ message: "Account created successfully." });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ error: "An account with this email already exists. Please log in instead." });
+    }
+    console.error("register error:", err);
+    return res.status(500).json({ error: "Could not create your account right now. Please try again." });
+  }
+});
+
+/* ==============================
+      LOGIN
+============================== */
+
+router.post("/login", async (req, res) => {
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const password = String(req.body.password || "");
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required." });
+    }
+
+    const user = await User.findOne({ email });
+
+    // Same generic error whether the email doesn't exist or the password
+    // is wrong, so we don't leak which emails are registered.
+    if (!user) {
+      return res.status(401).json({ error: "Invalid email or password." });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid email or password." });
+    }
+
+    const sessionToken = signSessionToken(user._id.toString());
+
+    return res.json({
+      message: "Login successful.",
+      sessionToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        fullname: user.fullname,
+        mobile: user.mobile,
+      },
+    });
+  } catch (err) {
+    console.error("login error:", err);
+    return res.status(500).json({ error: "Could not log in right now. Please try again." });
+  }
+});
+
+/* ==============================
+      FORGOT PASSWORD
+============================== */
+
+router.post("/forgot-password", otpLimiter, async (req, res) => {
+  const genericMessage = "If that email is registered, a new password has been sent to it.";
+
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+
+    if (!isValidEmailShape(email)) {
+      return res.status(400).json({ error: "Enter a valid email address." });
+    }
+
+    const user = await User.findOne({ email });
+
+    // Always respond with the same generic message, whether or not the
+    // account exists, so the endpoint can't be used to enumerate emails.
+    if (!user) {
+      return res.json({ message: genericMessage });
+    }
+
+    const tempPassword = generateTempPassword();
+    user.passwordHash = await bcrypt.hash(tempPassword, 10);
+    user.mustChangePassword = true;
+    await user.save();
+
+    const { subject, text, html } = tempPasswordEmailTemplate(tempPassword);
+    await sendMail({ to: email, subject, text, html });
+
+    return res.json({ message: genericMessage });
+  } catch (err) {
+    console.error("forgot-password error:", err);
+    // Still return the generic message on unexpected errors to avoid
+    // leaking account existence, but log server-side for debugging.
+    return res.json({ message: genericMessage });
+  }
+});
+
+/* ==============================
+      CURRENT USER PROFILE
+============================== */
+
+router.get("/me", requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.json({ user });
+  } catch (err) {
+    console.error("me error:", err);
+    return res.status(500).json({ error: "Could not load your profile right now." });
+  }
+});
+
+module.exports = router;

@@ -20,8 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png">
-    <link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <!-- Same base stylesheet as the login page, so both pages share
          one visual language. signup.css only adds the small delta this
@@ -51,9 +50,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 
             <div class="branding-card">
 
-               <img src="logo.png"
-     alt="IIEST Logo"
-     class="logo">
+                <img src="logo.png" alt="IIEST Logo" class="logo">
                 <h1>
 
                     Indian Institute of
@@ -152,14 +149,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 
                     <div class="email-group input-group--with-action" id="email-field-group">
 
-                        <input
-    type="email"
-    id="email"
-    name="email"
-    placeholder="Enter your email"
-    autocomplete="username">
+                        <input type="email" id="email" name="email" placeholder="Enter your email"
+                            autocomplete="username">
 
-                        <button type="button" id="generate-otp-btn" class="login-btn login-btn--inline">Generate OTP</button>
+                        <button type="button" id="generate-otp-btn" class="login-btn login-btn--inline">Generate
+                            OTP</button>
 
                     </div>
 
@@ -173,16 +167,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 
                     <div class="email-group input-group--with-action" id="otp-field-group">
 
-                        <input
-    type="text"
-    id="otp"
-    name="otp"
-    placeholder="Enter OTP"
-    inputmode="numeric"
-    maxlength="6"
-    disabled>
+                        <input type="text" id="otp" name="otp" placeholder="Enter OTP" inputmode="numeric" maxlength="6"
+                            disabled>
 
-                        <button type="button" id="verify-otp-btn" class="login-btn login-btn--inline" disabled>Verify</button>
+                        <button type="button" id="verify-otp-btn" class="login-btn login-btn--inline"
+                            disabled>Verify</button>
 
                     </div>
 
@@ -190,42 +179,21 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 
                     <!-- ----- Locked until OTP verified ----- -->
 
-                    <label for="password">
-
-                        Password
-
-                    </label>
-
+                    <label for="password">Password</label>
                     <div class="password-group locked-group" id="password-group">
-
-                        <input
-    type="password"
-    id="password"
-    name="password"
-    placeholder="Create a password"
-    disabled>
-
-                        <i class="fa-solid fa-lock" id="password-icon"></i>
-
+                        <input type="password" id="password" name="password" placeholder="Create a password" disabled>
+                        <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
+                            <i class="fa-solid fa-lock" id="password-icon"></i>
+                        </button>
                     </div>
 
-                    <label for="confirm-password">
-
-                        Re-enter Password
-
-                    </label>
-
+                    <label for="confirm-password">Re-enter Password</label>
                     <div class="password-group locked-group" id="confirm-password-group">
-
-                        <input
-    type="password"
-    id="confirm-password"
-    name="confirm-password"
-    placeholder="Re-enter your password"
-    disabled>
-
-                        <i class="fa-solid fa-lock" id="confirm-password-icon"></i>
-
+                        <input type="password" id="confirm-password" name="confirm-password"
+                            placeholder="Re-enter your password" disabled>
+                        <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
+                            <i class="fa-solid fa-lock" id="confirm-password-icon"></i>
+                        </button>
                     </div>
 
                     <label for="fullname">
@@ -236,12 +204,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 
                     <div class="email-group locked-group" id="fullname-group">
 
-                        <input
-    type="text"
-    id="fullname"
-    name="fullname"
-    placeholder="Enter your full name"
-    disabled>
+                        <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" disabled>
 
                     </div>
 
@@ -253,22 +216,12 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 
                     <div class="email-group locked-group" id="mobile-group">
 
-                        <input
-    type="tel"
-    id="mobile"
-    name="mobile"
-    placeholder="Enter your mobile number"
-    inputmode="numeric"
-    maxlength="10"
-    disabled>
+                        <input type="tel" id="mobile" name="mobile" placeholder="Enter your mobile number"
+                            inputmode="numeric" maxlength="10" disabled>
 
                     </div>
 
-                    <button
-                        type="submit"
-                        class="login-btn"
-                        id="submit-btn"
-                        disabled>
+                    <button type="submit" class="login-btn" id="submit-btn" disabled>
 
                         Submit
 

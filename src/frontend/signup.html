@@ -1,254 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>
-        IIEST Shibpur | Create Account
-    </title>
+    <meta name="description" content="Secure digital platform for semester registration, course selection, and academic services at IIEST Shibpur.">
+    <title>IIEST Shibpur | Create Account</title>
 
     <!-- Google Font -->
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
-    <!-- Same base stylesheet as the login page, so both pages share
-         one visual language. signup.css only adds the small delta this
-         page needs on top of it (OTP row, locked fields, modal). -->
+    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="signup.css">
-
 </head>
-
 <body class="signup-page">
 
     <!-- Background -->
-
     <div class="background"></div>
-
     <div class="overlay"></div>
 
     <!-- Main Container -->
+    <main class="container centered-container">
 
-    <main class="container">
+        <!-- Signup Card -->
+        <div class="login-card login-card--signup">
+            <button type="button" class="back-btn" id="backBtn" aria-label="Go Back">
+                <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+            
+            <h2 id="stepTitle">Create Account</h2>
+            <p class="login-subtitle" id="stepSubtitle">Register using your official IIEST student email</p>
 
-        <!-- ==========================================
-                    LEFT PANEL
-        =========================================== -->
-
-        <section class="left-panel">
-
-            <div class="branding-card">
-
-                <img src="logo.png" alt="IIEST Logo" class="logo">
-                <h1>
-
-                    Indian Institute of
-                    <br>
-                    Engineering Science and Technology
-
-                </h1>
-
-                <h2>
-
-                    SHIBPUR
-
-                </h2>
-
-                <div class="motto">
-
-                    <h3>
-
-                        उत्तिष्ठत जाग्रत
-                        प्राप्य वरान्निबोधत
-
-                    </h3>
-
-                    <p>
-
-                        Arise, Awake and Stop Not
-                        Till The Goal Is Reached
-
-                    </p>
-
+            <form id="signup-form" novalidate>
+                
+                <!-- ==============================
+                        STEP 1: IDENTITY
+                =============================== -->
+                <div id="step1" class="form-step active-step">
+                    <label for="email">Student Email</label>
+                    <div class="email-group">
+                        <input type="email" id="email" name="email" placeholder="Enter your @students.iiests.ac.in email" autocomplete="username">
+                    </div>
+                    <button type="button" id="generate-otp-btn" class="login-btn">Send OTP</button>
                 </div>
 
-                <div class="divider"></div>
-
-                <h4>
-
-                    Semester Registration Portal
-
-                </h4>
-
-                <p class="portal-description">
-
-                    A secure digital platform for
-                    semester registration,
-                    course selection,
-                    and academic services
-
-                </p>
-
-            </div>
-
-        </section>
-
-        <!-- ==========================================
-                    RIGHT PANEL
-        =========================================== -->
-
-        <section class="right-panel">
-
-            <!-- Navigation -->
-
-            <div class="top-menu">
-
-                <a href="index.html">Login</a>
-
-                <a href="#">Contact</a>
-
-            </div>
-
-            <!-- Signup Card -->
-
-            <div class="login-card login-card--signup">
-
-                <h2>
-
-                    Create Account
-
-                </h2>
-
-                <p class="login-subtitle">
-
-                    Register using your official
-                    IIEST student email
-
-                </p>
-
-                <form id="signup-form" novalidate>
-
-                    <!-- ----- Email + Generate OTP ----- -->
-
-                    <label for="email">
-
-                        Student Email
-
-                    </label>
-
-                    <div class="email-group input-group--with-action" id="email-field-group">
-
-                        <input type="email" id="email" name="email" placeholder="Enter your email"
-                            autocomplete="username">
-
-                        <button type="button" id="generate-otp-btn" class="login-btn login-btn--inline">Generate
-                            OTP</button>
-
+                <!-- ==============================
+                        STEP 2: VERIFICATION
+                =============================== -->
+                <div id="step2" class="form-step d-none">
+                    <label for="otp">Enter Verification Code</label>
+                    <div class="email-group">
+                        <input type="text" id="otp" name="otp" placeholder="6-digit OTP" inputmode="numeric" maxlength="6">
                     </div>
-
-                    <!-- ----- OTP + Verify ----- -->
-
-                    <label for="otp">
-
-                        OTP Verification
-
-                    </label>
-
-                    <div class="email-group input-group--with-action" id="otp-field-group">
-
-                        <input type="text" id="otp" name="otp" placeholder="Enter OTP" inputmode="numeric" maxlength="6"
-                            disabled>
-
-                        <button type="button" id="verify-otp-btn" class="login-btn login-btn--inline"
-                            disabled>Verify</button>
-
+                    
+                    <button type="button" id="verify-otp-btn" class="login-btn">Verify Account</button>
+                    
+                    <div class="resend-wrapper">
+                        <span id="timerText">Resend OTP in <strong id="countdown">30s</strong></span>
+                        <button type="button" id="resendOtpBtn" class="resend-btn d-none">Resend OTP</button>
                     </div>
+                </div>
 
-                    <p class="otp-status" id="otp-status"></p>
-
-                    <!-- ----- Locked until OTP verified ----- -->
-
-                    <label for="password">Password</label>
-                    <div class="password-group locked-group" id="password-group">
-                        <input type="password" id="password" name="password" placeholder="Create a password" disabled>
+                <!-- ==============================
+                        STEP 3: PROFILE
+                =============================== -->
+                <div id="step3" class="form-step d-none">
+                    <label for="password">Create Password</label>
+                    <div class="password-group">
+                        <input type="password" id="password" name="password" placeholder="Create a password">
                         <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
-                            <i class="fa-solid fa-lock" id="password-icon"></i>
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Password Strength Checklist -->
+                    <ul class="password-checklist">
+                        <li id="rule-length"><i class="fa-solid fa-circle-xmark"></i> At least 8 characters</li>
+                        <li id="rule-upper"><i class="fa-solid fa-circle-xmark"></i> 1 Uppercase letter</li>
+                        <li id="rule-number"><i class="fa-solid fa-circle-xmark"></i> 1 Number</li>
+                        <li id="rule-symbol"><i class="fa-solid fa-circle-xmark"></i> 1 Special character (!@#$%^&*)</li>
+                    </ul>
+
+                    <label for="confirm-password">Confirm Password</label>
+                    <div class="password-group">
+                        <input type="password" id="confirm-password" name="confirm-password" placeholder="Re-enter your password">
+                        <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
+                            <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
 
-                    <label for="confirm-password">Re-enter Password</label>
-                    <div class="password-group locked-group" id="confirm-password-group">
-                        <input type="password" id="confirm-password" name="confirm-password"
-                            placeholder="Re-enter your password" disabled>
-                        <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
-                            <i class="fa-solid fa-lock" id="confirm-password-icon"></i>
-                        </button>
-                    </div>
-
-                    <label for="fullname">
-
-                        Full Name
-
+                    <label class="declaration-checkbox">
+                        <input type="checkbox" id="declaration" required>
+                        I declare that I am a bonafide student of IIEST Shibpur.
                     </label>
 
-                    <div class="email-group locked-group" id="fullname-group">
-
-                        <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" disabled>
-
-                    </div>
-
-                    <label for="mobile">
-
-                        Mobile Number
-
-                    </label>
-
-                    <div class="email-group locked-group" id="mobile-group">
-
-                        <input type="tel" id="mobile" name="mobile" placeholder="Enter your mobile number"
-                            inputmode="numeric" maxlength="10" disabled>
-
-                    </div>
-
-                    <button type="submit" class="login-btn" id="submit-btn" disabled>
-
-                        Submit
-
-                    </button>
-
-                </form>
-
-                <div class="register">
-
-                    Already have an account?
-
-                    <a href="index.html">
-
-                        Login
-
-                    </a>
-
+                    <button type="submit" class="login-btn" id="submit-btn">Complete Registration</button>
                 </div>
 
-            </div>
+                <!-- Global Status Message -->
+                <p class="otp-status" id="otp-status"></p>
 
-        </section>
-
+            </form>
+        </div>
     </main>
 
-    <!-- ---------- Success modal ---------- -->
-
+    <!-- Success Modal -->
     <div class="modal-overlay" id="success-modal" hidden>
         <div class="modal-card">
             <div class="modal-card__icon">
@@ -256,22 +116,15 @@
             </div>
             <h2 class="modal-card__title">User Registered!</h2>
             <p class="modal-card__text">Your account has been created successfully.</p>
-            <a href="index.html" class="login-btn">Login</a>
+            <a href="index.html" class="login-btn" style="text-align: center;">Go to Login</a>
         </div>
     </div>
 
-    <!-- Footer -->
-
     <footer>
-
         © 2026 Indian Institute of Engineering Science and Technology, Shibpur
-
     </footer>
 
     <!-- JavaScript -->
-
     <script src="signup.js"></script>
-
 </body>
-
 </html>

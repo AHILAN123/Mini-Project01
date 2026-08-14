@@ -65,62 +65,107 @@
 
             <!-- Login Card -->
             <div class="login-card">
-                <h2>Student Login</h2>
-                <p class="login-subtitle">Sign in using your official IIEST student account</p>
 
-                <form id="loginForm">
-                    <label for="email">Student Email</label>
-                    <div class="email-group">
-                        <input type="email" id="email" name="email" placeholder="Enter your email"
-                            autocomplete="username">
+                <!-- ==============================
+                        STANDARD LOGIN VIEW
+                =============================== -->
+                <div id="standardLoginView">
+                    <h2>Student Login</h2>
+                    <p class="login-subtitle">Sign in using your official IIEST student account</p>
+
+                    <form id="loginForm">
+                        <label for="email">Student Email</label>
+                        <div class="email-group">
+                            <input type="email" id="email" name="email" placeholder="Enter your email" autocomplete="username">
+                        </div>
+
+                        <label for="password">Password</label>
+                        <div class="password-group">
+                            <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password">
+                            <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
+                                <i class="fa-solid fa-eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+
+                        <!-- Caps Lock Warning -->
+                        <div id="capsLockWarning" class="caps-warning d-none">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Caps Lock is ON
+                        </div>
+
+                        <!-- Options Row: Remember Me + Forgot Password -->
+                        <div class="login-options">
+                            <label class="remember-me-checkbox">
+                                <input type="checkbox" id="rememberMe"> Remember Me
+                            </label>
+                            <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+                        </div>
+
+                        <p class="login-status" id="loginStatus"></p>
+                        <button type="submit" class="login-btn" id="loginBtnText">Login</button>
+                    </form>
+
+                    <!-- Google Auth Section -->
+                    <div id="googleAuthSection">
+                        <div class="auth-divider">OR</div>
+
+                        <button type="button" class="login-btn google-btn" id="customGoogleBtn">
+                            <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                            </svg>
+                            Sign in with Google
+                        </button>
+
+                        <p class="login-status text-center mt-2 d-none" id="googleFallbackMsg"></p>
                     </div>
 
-                    <label for="password">Password</label>
-                    <div class="password-group">
-                        <input type="password" id="password" name="password" placeholder="Enter your password"
-                            autocomplete="current-password">
-                        <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
-                            <i class="fa-solid fa-eye" id="togglePasswordIcon"></i>
+                    <div class="register">
+                        Don't have an account? <a href="signup.html">Create Account</a>
+                    </div>
+
+                    <div class="register" style="margin-top: 12px;">
+                        <a href="#" id="adminToggleLink" class="admin-toggle-btn"><i class="fa-solid fa-user-shield"></i> Staff / Admin Login</a>
+                    </div>
+                </div>
+
+                <!-- ==============================
+                        RETURNING USER VIEW
+                =============================== -->
+                <div id="returningUserView" class="returning-user-view d-none">
+                    <div class="returning-avatar" id="returningAvatar">JB</div>
+                    <h2 id="returningGreeting">Welcome back!</h2>
+                    <p class="returning-email" id="returningEmail"></p>
+
+                    <form id="returningLoginForm">
+                        <label for="returningPassword">Password</label>
+                        <div class="password-group">
+                            <input type="password" id="returningPassword" placeholder="Enter your password" autocomplete="current-password">
+                            <button type="button" class="toggle-password-btn" aria-label="Toggle password visibility">
+                                <i class="fa-solid fa-eye" id="toggleReturningPasswordIcon"></i>
+                            </button>
+                        </div>
+
+                        <div id="returningCapsLockWarning" class="caps-warning d-none">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Caps Lock is ON
+                        </div>
+
+                        <div class="login-options" style="justify-content: flex-end;">
+                            <a href="#" id="returningForgotPasswordLink">Forgot Password?</a>
+                        </div>
+
+                        <p class="login-status" id="returningLoginStatus"></p>
+                        <button type="submit" class="login-btn" id="returningLoginBtn">Sign In</button>
+                    </form>
+
+                    <div class="switch-account-wrapper">
+                        <button type="button" id="switchAccountBtn" class="switch-account-btn">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign in with a different account
                         </button>
                     </div>
-
-                    <!-- Caps Lock Warning -->
-                    <div id="capsLockWarning" class="caps-warning d-none">
-                        <i class="fa-solid fa-triangle-exclamation"></i> Caps Lock is ON
-                    </div>
-
-                    <div class="forgot">
-                        <a href="#" id="forgotPasswordLink">Forgot Password?</a>
-                    </div>
-
-                    <p class="login-status" id="loginStatus"></p>
-                    <button type="submit" class="login-btn" id="loginBtnText">Login</button>
-                </form>
-
-                <!-- Google Auth Section -->
-                <div id="googleAuthSection">
-                    <div class="auth-divider">OR</div>
-
-                    <button type="button" class="login-btn google-btn" id="customGoogleBtn">
-                        <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-                            <path fill="#EA4335"
-                                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-                            <path fill="#4285F4"
-                                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                            <path fill="#FBBC05"
-                                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-                            <path fill="#34A853"
-                                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-                        </svg>
-                        Sign in with Google
-                    </button>
-
-                    <p class="login-status text-center mt-2 d-none" id="googleFallbackMsg"></p>
                 </div>
 
-                <div class="register">
-                    Don't have an account? <a href="signup.html">Create Account</a>
-                </div>
             </div>
         </section>
     </main>

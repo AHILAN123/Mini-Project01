@@ -1,53 +1,44 @@
 /*==================================================
-        IIEST SHIBPUR
-Semester Registration Portal; SIGNUP.JS
+        IIEST SHIBPUR - SIGNUP PAGE WIZARD JS
 ==================================================*/
 
-/*==============================
-        API BASE
-==============================*/
 const API_BASE = "http://localhost:5000/api/auth";
 
-/*==============================
-        DOM ELEMENTS
-==============================*/
-const signupForm = document.getElementById("signup-form");
+/* --- DOM Elements --- */
+const step1 = document.getElementById("step1");
+const step2 = document.getElementById("step2");
+const step3 = document.getElementById("step3");
+const backBtn = document.getElementById("backBtn");
+const stepTitle = document.getElementById("stepTitle");
+const stepSubtitle = document.getElementById("stepSubtitle");
 
 const emailInput = document.getElementById("email");
 const generateOtpBtn = document.getElementById("generate-otp-btn");
 
 const otpInput = document.getElementById("otp");
 const verifyOtpBtn = document.getElementById("verify-otp-btn");
-const otpStatus = document.getElementById("otp-status");
-
-const lockedGroups = [
-    document.getElementById("password-group"),
-    document.getElementById("confirm-password-group"),
-    document.getElementById("fullname-group"),
-    document.getElementById("mobile-group"),
-];
+const timerText = document.getElementById("timerText");
+const countdownEl = document.getElementById("countdown");
+const resendOtpBtn = document.getElementById("resendOtpBtn");
 
 const passwordInput = document.getElementById("password");
 const confirmPasswordInput = document.getElementById("confirm-password");
-const fullnameInput = document.getElementById("fullname");
-const mobileInput = document.getElementById("mobile");
+const declaration = document.getElementById("declaration");
 const submitBtn = document.getElementById("submit-btn");
 
-const passwordIcon = document.getElementById("password-icon");
-const confirmPasswordIcon = document.getElementById("confirm-password-icon");
+const otpStatus = document.getElementById("otp-status");
+const successModal = document.getElementById("success-modal");
 const togglePasswordBtns = document.querySelectorAll(".toggle-password-btn");
 
-const successModal = document.getElementById("success-modal");
+/* --- State --- */
+let currentStep = 1;
+let verificationToken = null;
+let resendTimer = null;
+let isPasswordStrong = false;
 
-let verificationToken = null; 
-let otpVerified = false;
-
-/*==============================
-        HELPER FUNCTIONS
-==============================*/
+/* --- Helpers --- */
 function isValidEmail(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function showStatus(message, isError = true) {
@@ -55,22 +46,68 @@ function showStatus(message, isError = true) {
     otpStatus.className = isError ? "otp-status otp-status--error" : "otp-status otp-status--success";
 }
 
-/*==============================
-        STEP 1: GENERATE OTP
-==============================*/
-generateOtpBtn.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-
-    if (!isValidEmail(email)) {
-        showStatus("Enter a valid email first.");
-        emailInput.focus();
-        return;
-    }
-
-    generateOtpBtn.disabled = true;
-    generateOtpBtn.classList.add("loading");
+function clearStatus() {
     otpStatus.textContent = "";
-    otpStatus.className = "otp-status";
+}
+
+function setStep(step) {
+    currentStep = step;
+    clearStatus();
+    step1.classList.add("d-none");
+    step2.classList.add("d-none");
+    step3.classList.add("d-none");
+
+    if (step === 1) {
+        stepTitle.textContent = "Create Account";
+        stepSubtitle.textContent = "Register using your official IIEST student email";
+        step1.classList.remove("d-none");
+        emailInput.focus();
+    } else if (step === 2) {
+        stepTitle.textContent = "Verify Email";
+        stepSubtitle.textContent = `Code sent to ${emailInput.value.trim()}`;
+        step2.classList.remove("d-none");
+        otpInput.value = "";
+        otpInput.focus();
+        startResendTimer();
+    } else if (step === 3) {
+        stepTitle.textContent = "Complete Profile";
+        stepSubtitle.textContent = "Set up your credentials";
+        step3.classList.remove("d-none");
+        passwordInput.focus();
+    }
+}
+
+/* --- Back Button Logic --- */
+backBtn.addEventListener("click", () => {
+    if (currentStep === 1) {
+        window.location.href = "index.html"; 
+    } else if (currentStep === 2) {
+        clearInterval(resendTimer);
+        setStep(1); 
+    } else if (currentStep === 3) {
+        if (confirm("Going back will reset your verification. Are you sure?")) setStep(1);
+    }
+});
+
+/* ==============================
+        STEP 1: SEND OTP
+============================== */
+// Ensure only one listener is attached
+generateOtpBtn.onclick = sendOtpRequest;
+resendOtpBtn.onclick = sendOtpRequest;
+
+async function sendOtpRequest() {
+    const email = emailInput.value.trim();
+    if (!isValidEmail(email)) return showStatus("Enter a valid email address.");
+
+    const btn = currentStep === 1 ? generateOtpBtn : resendOtpBtn;
+    
+    // Anti-Double-Click Protection
+    if (btn.disabled) return; 
+
+    btn.disabled = true;
+    btn.classList.add("loading");
+    clearStatus();
 
     try {
         const res = await fetch(`${API_BASE}/send-otp`, {
@@ -79,237 +116,180 @@ generateOtpBtn.addEventListener("click", async () => {
             body: JSON.stringify({ email }),
         });
 
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-            throw new TypeError("Server returned a non-JSON response.");
-        }
-
-        const data = await res.json();
-
+        let data;
+        try { data = await res.json(); } catch(e) { data = { error: "Rate limit or server error." }; }
+        
+        btn.classList.remove("loading");
+        
         if (!res.ok) {
-            showStatus(data.error || "Could not send OTP.");
-            generateOtpBtn.disabled = false;
-            generateOtpBtn.classList.remove("loading");
-            return;
+            btn.disabled = false;
+            return showStatus(data.error || "Could not send OTP.");
         }
 
-        otpInput.disabled = false;
-        verifyOtpBtn.disabled = false;
-        otpInput.focus();
-
-        // Change text inside button, but remove loader so the text is visible
-        generateOtpBtn.textContent = "Resend OTP";
-        generateOtpBtn.disabled = false;
-        generateOtpBtn.classList.remove("loading");
-
-        showStatus("OTP sent to " + email + ".", false);
+        if (currentStep === 1) setStep(2);
+        else startResendTimer();
 
     } catch (err) {
-        generateOtpBtn.disabled = false;
-        generateOtpBtn.classList.remove("loading");
-        if (err instanceof TypeError) {
-            showStatus("Server error. Is the backend running properly?");
-        } else {
-            showStatus("Network error. Could not connect to the server.");
+        console.error("Frontend Fetch Error:", err);
+        btn.disabled = false;
+        btn.classList.remove("loading");
+        showStatus("Network error. Please check your connection.");
+    }
+}
+
+/* --- Resend Timer --- */
+function startResendTimer() {
+    clearInterval(resendTimer);
+    resendOtpBtn.classList.add("d-none");
+    timerText.classList.remove("d-none");
+    
+    let timeLeft = 30;
+    countdownEl.textContent = `${timeLeft}s`;
+
+    resendTimer = setInterval(() => {
+        timeLeft--;
+        countdownEl.textContent = `${timeLeft}s`;
+        if (timeLeft <= 0) {
+            clearInterval(resendTimer);
+            timerText.classList.add("d-none");
+            resendOtpBtn.disabled = false;
+            resendOtpBtn.classList.remove("d-none");
         }
-    }
-});
+    }, 1000);
+}
 
-/*==============================
+/* ==============================
         STEP 2: VERIFY OTP
-==============================*/
-verifyOtpBtn.addEventListener("click", async () => {
-    const enteredOtp = otpInput.value.trim();
+============================== */
+verifyOtpBtn.onclick = async () => {
+    if (verifyOtpBtn.disabled) return; // Anti-Double-Click
 
-    if (!enteredOtp) {
-        showStatus("Enter the OTP you received.");
-        return;
-    }
+    const otp = otpInput.value.trim();
+    if (otp.length < 6) return showStatus("Enter the 6-digit OTP.");
 
     verifyOtpBtn.disabled = true;
     verifyOtpBtn.classList.add("loading");
+    clearStatus();
 
     try {
         const res = await fetch(`${API_BASE}/verify-otp`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: emailInput.value.trim(), otp: enteredOtp }),
+            body: JSON.stringify({ email: emailInput.value.trim(), otp }),
         });
 
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-            throw new TypeError("Server returned a non-JSON response.");
-        }
+        let data;
+        try { data = await res.json(); } catch(e) { data = { error: "Rate limit or server error." }; }
 
-        const data = await res.json();
         verifyOtpBtn.classList.remove("loading");
-
+        
         if (!res.ok) {
-            showStatus(data.error || "Incorrect OTP. Please try again.");
             verifyOtpBtn.disabled = false;
-            return;
+            return showStatus(data.error || "Incorrect OTP.");
         }
 
-        // ----- Unlock the rest of the form -----
         verificationToken = data.verificationToken;
-        otpVerified = true;
-
-        showStatus("Email verified.", false);
-
-        otpInput.disabled = true;
-        verifyOtpBtn.disabled = true;
-        generateOtpBtn.disabled = true;
-        emailInput.disabled = true;
-
-        lockedGroups.forEach((group) => group.classList.remove("locked-group"));
-
-        [passwordInput, confirmPasswordInput, fullnameInput, mobileInput].forEach(
-            (input) => (input.disabled = false)
-        );
-
-        submitBtn.disabled = false;
-
-        // Swap the lock icons for real show/hide password eyes
-        passwordIcon.classList.remove("fa-lock");
-        passwordIcon.classList.add("fa-eye");
-        
-        confirmPasswordIcon.classList.remove("fa-lock");
-        confirmPasswordIcon.classList.add("fa-eye");
-
-        fullnameInput.focus();
+        clearInterval(resendTimer);
+        setStep(3);
 
     } catch (err) {
+        console.error("Frontend Fetch Error:", err);
         verifyOtpBtn.disabled = false;
         verifyOtpBtn.classList.remove("loading");
-        if (err instanceof TypeError) {
-            showStatus("Server error. Is the backend running properly?");
-        } else {
-            showStatus("Network error. Could not connect to the server.");
-        }
+        showStatus("Network error. Please check your connection.");
     }
+};
+
+/* ==============================
+      STEP 3: PASSWORD VALIDATION
+============================== */
+passwordInput.addEventListener("input", (e) => {
+    const val = e.target.value;
+    const rules = {
+        length: val.length >= 8,
+        upper: /[A-Z]/.test(val),
+        number: /[0-9]/.test(val),
+        symbol: /[!@#$%^&*.,<>?]/.test(val)
+    };
+
+    updateRuleUI("rule-length", rules.length);
+    updateRuleUI("rule-upper", rules.upper);
+    updateRuleUI("rule-number", rules.number);
+    updateRuleUI("rule-symbol", rules.symbol);
+
+    isPasswordStrong = rules.length && rules.upper && rules.number && rules.symbol;
 });
 
-/*==============================
-        SHOW / HIDE PASSWORD
-==============================*/
-togglePasswordBtns.forEach(btn => {
-    btn.addEventListener("click", function() {
-        // Prevent toggling if form is still locked
-        if (!otpVerified) return;
+function updateRuleUI(elementId, isValid) {
+    const el = document.getElementById(elementId);
+    const icon = el.querySelector("i");
+    if (isValid) {
+        el.classList.add("valid");
+        icon.className = "fa-solid fa-circle-check";
+    } else {
+        el.classList.remove("valid");
+        icon.className = "fa-solid fa-circle-xmark";
+    }
+}
 
+togglePasswordBtns.forEach(btn => {
+    btn.onclick = function() {
         const input = this.previousElementSibling; 
         const icon = this.querySelector("i");
-        
         if (input.type === "password") {
             input.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
+            icon.className = "fa-solid fa-eye-slash";
         } else {
             input.type = "password";
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
+            icon.className = "fa-solid fa-eye";
         }
-    });
+    };
 });
 
-/*==============================
-        STEP 3: SUBMIT REGISTRATION
-==============================*/
-signupForm.addEventListener("submit", async (e) => {
+/* ==============================
+      STEP 3: SUBMIT REGISTRATION
+============================== */
+document.getElementById("signup-form").addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (currentStep !== 3 || submitBtn.disabled) return;
 
-    if (!otpVerified) return; 
-
-    if (passwordInput.value.length < 6) {
-        showStatus("Password must be at least 6 characters.");
-        passwordInput.focus();
-        return;
-    }
-
+    if (!isPasswordStrong) return showStatus("Please meet all password requirements.");
     if (passwordInput.value !== confirmPasswordInput.value) {
-        showStatus("Passwords do not match.");
         confirmPasswordInput.focus();
-        return;
+        return showStatus("Passwords do not match.");
     }
-
-    if (fullnameInput.value.trim() === "") {
-        showStatus("Enter your full name.");
-        fullnameInput.focus();
-        return;
-    }
-
-    if (!/^\d{10}$/.test(mobileInput.value.trim())) {
-        showStatus("Enter a valid 10-digit mobile number.");
-        mobileInput.focus();
-        return;
-    }
-
-    const payload = {
-        email: emailInput.value.trim(),
-        password: passwordInput.value,
-        confirmPassword: confirmPasswordInput.value,
-        fullname: fullnameInput.value.trim(),
-        mobile: mobileInput.value.trim(),
-        verificationToken,
-    };
+    if (!declaration.checked) return showStatus("You must accept the declaration.");
 
     submitBtn.disabled = true;
     submitBtn.classList.add("loading");
+    clearStatus();
 
     try {
         const res = await fetch(`${API_BASE}/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({
+                email: emailInput.value.trim(),
+                password: passwordInput.value,
+                confirmPassword: confirmPasswordInput.value,
+                verificationToken,
+            }),
         });
-
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-            throw new TypeError("Server returned a non-JSON response.");
-        }
 
         const data = await res.json();
         submitBtn.classList.remove("loading");
 
         if (!res.ok) {
-            showStatus(data.error || "Could not register. Please try again.");
             submitBtn.disabled = false;
-            return;
+            return showStatus(data.error || "Could not register. Please try again.");
         }
 
         successModal.hidden = false;
 
     } catch (err) {
+        console.error("Frontend Registration Error:", err);
         submitBtn.disabled = false;
         submitBtn.classList.remove("loading");
-        
-        if (err instanceof TypeError) {
-            showStatus("Server error. Is the backend running properly?");
-        } else {
-            showStatus("Network error. Could not connect to the server.");
-        }
+        showStatus("Network error. Please check your connection.");
     }
-});
-
-/*==============================
-        ACTIVE MENU
-==============================*/
-const nav = document.querySelectorAll(".top-menu a");
-nav.forEach(item => {
-    item.addEventListener("click", (e) => {
-        if (item.getAttribute("href") === "#") {
-            e.preventDefault();
-        }
-        nav.forEach(link => {
-            link.classList.remove("active");
-        });
-        item.classList.add("active");
-    });
-});
-
-/*==============================
-        PAGE LOADED
-==============================*/
-window.addEventListener("load", () => {
-    console.log("IIEST Signup Page Loaded");
 });

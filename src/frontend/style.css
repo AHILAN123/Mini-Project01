@@ -1668,3 +1668,137 @@ input[type="password"]::-webkit-reveal {
 .d-none { display: none !important; }
 .text-center { text-align: center; }
 .mt-2 { margin-top: 10px; }
+
+/*==============================
+        ADMIN TOGGLE BUTTON
+==============================*/
+.admin-toggle-btn {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.95rem !important;
+    color: var(--primary-light) !important;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s ease;
+}
+.admin-toggle-btn:hover {
+    color: var(--primary) !important;
+    transform: translateY(-2px);
+}
+
+/*==============================
+        FIXED BUTTON HOVER GLOW
+==============================*/
+/* Kill the old buggy swipe effect */
+.login-btn::before {
+    display: none !important;
+}
+
+/* Add a clean, premium glow instead */
+.login-btn:hover {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #111;
+    border-color: transparent;
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+    transform: translateY(-2px);
+}
+
+/*==============================
+        BROWSER AUTOFILL FIX
+==============================*/
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #131c2e inset !important;
+    -webkit-text-fill-color: #F8F9FA !important;
+    caret-color: var(--primary) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/*==============================
+        OPTIONS ROW & CHECKBOX
+==============================*/
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0 20px;
+    font-size: 0.88rem;
+}
+.remember-me-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    margin: 0 !important;
+    font-size: 0.88rem !important;
+}
+.remember-me-checkbox input {
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+.login-options a {
+    color: #d5d5d5;
+    text-decoration: none;
+    transition: 0.3s;
+}
+.login-options a:hover {
+    color: var(--primary);
+}
+
+/*==============================
+        RETURNING USER VIEW
+==============================*/
+.returning-user-view {
+    text-align: center;
+    animation: fadeUp 0.4s ease forwards;
+}
+.returning-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #111;
+    font-weight: 700;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.35);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+.returning-user-view h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+.returning-email {
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-bottom: 22px;
+    word-break: break-all;
+}
+.switch-account-wrapper {
+    margin-top: 24px;
+    text-align: center;
+}
+.switch-account-btn {
+    background: transparent;
+    border: none;
+    color: var(--primary-light);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s ease;
+}
+.switch-account-btn:hover {
+    color: var(--primary);
+    transform: translateY(-1px);
+}

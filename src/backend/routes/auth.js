@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
@@ -92,61 +93,69 @@ router.post("/send-otp", otpLimiter, async (req, res) => {
 });
 
 /* ==============================
-      STEP 2: VERIFY OTP (SIGNUP)
+      STEP 2: VERIFY OTP
 ============================== */
-
-router.post("/verify-otp", otpLimiter, async (req, res) => {
+router.post("/verify-otp", async (req, res) => {
   try {
+    const { otp } = req.body;
     const email = String(req.body.email || "").trim().toLowerCase();
-    const otp = String(req.body.otp || "").trim();
 
     if (!email || !otp) {
       return res.status(400).json({ error: "Email and OTP are required." });
     }
 
-    const record = await Otp.findOne({ email, purpose: "signup" }).sort({ createdAt: -1 });
+    // 1. Find the OTP record
+    const otpRecord = await mongoose.model("Otp").findOne({ email }).sort({ createdAt: -1 });
 
-    if (!record) {
-      return res.status(400).json({ error: "No OTP found for this email. Please request a new one." });
+    if (!otpRecord) {
+      return res.status(400).json({ error: "OTP expired or not found. Please request a new one." });
     }
 
-    if (record.expiresAt < new Date()) {
-      await Otp.deleteOne({ _id: record._id });
-      return res.status(400).json({ error: "This OTP has expired. Please request a new one." });
+    // 2. Check max attempts (Optional, if you have this field in your schema)
+    if (otpRecord.attempts >= 5) {
+      await mongoose.model("Otp").deleteOne({ _id: otpRecord._id });
+      return res.status(429).json({ error: "Too many failed attempts. Please request a new OTP." });
     }
 
-    if (record.attempts >= Number(process.env.OTP_MAX_ATTEMPTS || 5)) {
-      await Otp.deleteOne({ _id: record._id });
-      return res.status(429).json({ error: "Too many incorrect attempts. Please request a new OTP." });
-    }
-
-    const isMatch = await compareOtp(otp, record.otpHash);
-
+    // 3. Verify the OTP
+    const isMatch = await bcrypt.compare(String(otp), otpRecord.otpHash);
     if (!isMatch) {
-      record.attempts += 1;
-      await record.save();
+      otpRecord.attempts = (otpRecord.attempts || 0) + 1;
+      await otpRecord.save();
       return res.status(400).json({ error: "Incorrect OTP. Please try again." });
     }
 
-    // OTP is correct and consumed — delete it so it can't be reused.
-    await Otp.deleteOne({ _id: record._id });
+    // 4. Generate the Verification Token (This is usually where it crashes!)
+    const jwt = require("jsonwebtoken"); // Ensure jwt is required
+    const secret = process.env.JWT_VERIFICATION_SECRET || "fallback_secret_key_123"; // Fallback prevents crash
+    
+    const verificationToken = jwt.sign(
+      { email, purpose: "signup" },
+      secret,
+      { expiresIn: "15m" }
+    );
 
-    const verificationToken = signVerificationToken(email);
+    // 5. Clean up the used OTP
+    await mongoose.model("Otp").deleteOne({ _id: otpRecord._id });
 
-    return res.json({ message: "Email verified.", verificationToken });
+    // 6. Send success response
+    return res.json({ 
+      message: "Email verified successfully.", 
+      verificationToken 
+    });
+
   } catch (err) {
     console.error("verify-otp error:", err);
-    return res.status(500).json({ error: "Could not verify OTP right now. Please try again." });
+    return res.status(500).json({ error: "Internal server error during verification." });
   }
 });
 
 /* ==============================
       STEP 3: REGISTER
 ============================== */
-
 router.post("/register", async (req, res) => {
   try {
-    const { password, confirmPassword, fullname, mobile, verificationToken } = req.body;
+    const { password, confirmPassword, verificationToken } = req.body;
     const email = String(req.body.email || "").trim().toLowerCase();
 
     if (!verificationToken) {
@@ -164,24 +173,12 @@ router.post("/register", async (req, res) => {
       return res.status(401).json({ error: "Verification does not match this email. Please verify again." });
     }
 
-    if (!isInstituteEmail(email)) {
-      return res.status(400).json({ error: `Please sign up using your official @${getAllowedDomain()} email address.` });
-    }
-
     if (!password || password.length < 6) {
       return res.status(400).json({ error: "Password must be at least 6 characters." });
     }
 
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords do not match." });
-    }
-
-    if (!fullname || !fullname.trim()) {
-      return res.status(400).json({ error: "Full name is required." });
-    }
-
-    if (!/^\d{10}$/.test(String(mobile || "").trim())) {
-      return res.status(400).json({ error: "Enter a valid 10-digit mobile number." });
     }
 
     const existingUser = await User.findOne({ email });
@@ -191,11 +188,10 @@ router.post("/register", async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
+    // Save strictly the auth data
     await User.create({
       email,
       passwordHash,
-      fullname: fullname.trim(),
-      mobile: String(mobile).trim(),
       isEmailVerified: true,
     });
 

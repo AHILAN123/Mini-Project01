@@ -2,11 +2,15 @@ const dns = require("dns");
 dns.setServers(["1.1.1.1"]);
 require("dotenv").config();
 
+require("./models/Course"); // Ensure the Course model is initialized
+
 const express = require("express");
 const cors = require("cors");
 
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
+const adminRoutes = require("./routes/admin");
+const registrationRoutes = require("./routes/registration");
 // const pdfRoutes = require("./routes/generatePdfRoutes");
 const cleanupPDFs=require("./services/cleanupService.js");
 const generatePdfRoutes=require("./routes/generatePdfRoutes.js");
@@ -25,6 +29,8 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/registration", registrationRoutes);
 // app.use("/api/pdf", pdfRoutes);
 
 app.use("/api/generatePdf", generatePdfRoutes);
@@ -48,8 +54,19 @@ connectDB()
     process.exit(1);
   });
 
-
 // Cleaning up pdfs older than 14 days
 setInterval(() => { 
     cleanupPDFs();
 }, 24 * 60 * 60 * 1000);
+
+// --- POSTGRESQL CONNECTION ---
+const { sequelize } = require("./models/Student");
+require("./models/Registration");
+
+sequelize.sync({ alter: true }) // 'alter: true' updates the table if we change the schema later
+  .then(() => {
+    console.log("PostgreSQL connected: Student table synced");
+  })
+  .catch((err) => {
+    console.error("PostgreSQL connection error:", err);
+  });

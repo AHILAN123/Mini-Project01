@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 
 const User = require("../models/User");
 const Otp = require("../models/Otp");
+const { Student } = require("../models/Student"); // Connect to Postgres
 const { requireAuth } = require("../middleware/auth_middle");
 const { sendMail, otpEmailTemplate, tempPasswordEmailTemplate } = require("../utils/mailer");
 const { generateOtp, hashOtp, compareOtp, generateTempPassword } = require("../utils/otp");
@@ -219,7 +220,7 @@ router.post("/login", async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-
+    
     // Same generic error whether the email doesn't exist or the password
     // is wrong, so we don't leak which emails are registered.
     if (!user) {
@@ -359,16 +360,30 @@ router.post("/forgot-password", otpLimiter, async (req, res) => {
 /* ==============================
       CURRENT USER PROFILE
 ============================== */
-
 router.get("/me", requireAuth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
-
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    return res.json({ user });
+    // Reach into PostgreSQL for the official Admin records
+    const pgStudent = await Student.findOne({ where: { email: user.email } });
+
+    // Merge the official Postgres data into the response
+    const profileData = {
+        id: user._id,
+        email: user.email,
+        fullname: pgStudent ? pgStudent.fullname : (user.fullname || ""),
+        mobile: pgStudent ? pgStudent.mobile : (user.mobile || ""),
+        department: pgStudent ? pgStudent.department : "Computer Science and Technology",
+        enrollmentNo: pgStudent ? pgStudent.enrollmentNo : "Pending Admin Input" // <-- ADDED THIS
+    };
+
+    return res.json({ 
+        user: profileData, 
+        feeStatus: pgStudent ? pgStudent.feeStatus : false 
+    });
   } catch (err) {
     console.error("me error:", err);
     return res.status(500).json({ error: "Could not load your profile right now." });

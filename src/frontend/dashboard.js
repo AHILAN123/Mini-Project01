@@ -6,94 +6,112 @@ const API_BASE = "http://localhost:5000/api/auth";
 const sessionToken = sessionStorage.getItem("sessionToken");
 
 if (!sessionToken) {
-    // No one is logged in for this tab/session — bounce back to login.
-    window.location.href = "../login/index.html";
+    window.location.href = "index.html";
 }
 
-function getInitials(fullname) {
-    if (!fullname) return "?";
-    const parts = fullname.trim().split(/\s+/);
+// SMART NAME EXTRACTION FIX (Handles Roll Numbers & Emails)
+function getInitials(name) {
+    if (!name) return "ST";
+    const parts = name.trim().split(/[\s_.]+/).filter(p => !/^\d/.test(p));
+    if (parts.length === 0) return name.substring(0, 2).toUpperCase();
     const initials = parts.slice(0, 2).map(p => p[0]).join("");
     return initials.toUpperCase();
 }
 
-function applyUserToDashboard(user) {
-    const initials = getInitials(user.fullname);
+function applyUserToDashboard(user, feeStatus = false) {
+    let displayName = user.fullname;
+    
+    if (!displayName || displayName === "Pending Admin Input" || displayName === "Institute Student") {
+        const emailPrefix = user.email.split("@")[0]; 
+        const namePart = emailPrefix.split(".").pop(); 
+        displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1); 
+    }
 
-    // Sidebar
+    const initials = getInitials(displayName);
+
+    // 1. Sidebar Elements
     const sidebarAvatarEl = document.querySelector(".sidebar .avatar");
-    const sidebarNameEl = document.querySelector(".sidebar .user-info .name");
-    const sidebarRollEl = document.querySelector(".sidebar .user-info .roll");
+    const sidebarNameEl = document.getElementById("sidebarName");
+    const sidebarEmailEl = document.getElementById("sidebarEmail");
 
-    if (sidebarAvatarEl && !sidebarAvatarEl.style.backgroundImage.includes("url")) {
-        sidebarAvatarEl.textContent = initials;
+    if (sidebarAvatarEl && !sidebarAvatarEl.style.backgroundImage.includes("url")) sidebarAvatarEl.textContent = initials;
+    if (sidebarNameEl) sidebarNameEl.textContent = displayName;
+    if (sidebarEmailEl) sidebarEmailEl.textContent = user.email;
+
+    // 2. Dashboard Greeting Elements
+    const dashboardGreeting = document.getElementById("dashboardGreeting");
+    if (dashboardGreeting) dashboardGreeting.textContent = `Welcome back, ${displayName}!`;
+
+    // 3. Update the Dynamic Fee Status Card
+    const feeCard = document.querySelector('.status-card p'); // Targets the first card
+    if (feeCard) {
+        if (feeStatus) {
+            feeCard.textContent = "Cleared";
+            feeCard.className = "text-success";
+        } else {
+            feeCard.textContent = "Pending";
+            feeCard.className = "text-warning";
+        }
     }
-    if (sidebarNameEl) sidebarNameEl.textContent = user.fullname;
-    if (sidebarRollEl) sidebarRollEl.textContent = user.email;
 
-    // Settings -> Profile Details
+    // 4. Settings Elements
     const settingsAvatarEl = document.getElementById("settingsAvatar");
-    if (settingsAvatarEl && !settingsAvatarEl.style.backgroundImage.includes("url")) {
-        settingsAvatarEl.textContent = initials;
-    }
+    const settingsNameEl = document.getElementById("settingsName");
+    const settingsEmailEl = document.getElementById("settingsEmail");
+    const settingsFormName = document.getElementById("settingsFormName");
+    const settingsFormEmail = document.getElementById("settingsFormEmail");
 
-    const avatarInfoName = document.querySelector(".avatar-info h4");
-    const avatarInfoSub = document.querySelector(".avatar-info p");
-    if (avatarInfoName) avatarInfoName.textContent = user.fullname;
-    if (avatarInfoSub) avatarInfoSub.textContent = user.email;
+    if (settingsAvatarEl && !settingsAvatarEl.style.backgroundImage.includes("url")) settingsAvatarEl.textContent = initials;
+    if (settingsNameEl) settingsNameEl.textContent = displayName;
+    if (settingsEmailEl) settingsEmailEl.textContent = user.email;
+    if (settingsFormName) settingsFormName.value = displayName;
+    if (settingsFormEmail) settingsFormEmail.value = user.email;
 
-    const profileForm = document.getElementById("profileForm");
-    if (profileForm) {
-        const nameInput = profileForm.querySelector('input[type="text"]');
-        const emailInput = profileForm.querySelector('input[type="email"]');
-        if (nameInput) nameInput.value = user.fullname;
-        if (emailInput) emailInput.value = user.email;
-    }
+    // 5. Registration Form Elements
+    const regName = document.getElementById("regName");
+    const regEmail = document.getElementById("regEmail");
+    const regMobile = document.getElementById("regMobile");
+    const regEnrollmentNo = document.getElementById("regEnrollmentNo"); // <-- Add this
+    
+    if (regName) regName.value = displayName;
+    if (regEmail) regEmail.value = user.email;
+    if (regMobile) regMobile.value = user.mobile || "Pending Admin Input";
+    if (regEnrollmentNo) regEnrollmentNo.value = user.enrollmentNo || "Pending Admin Input"; // <-- Add this
 
-    // Settings -> Update Contact Info
+    // 6. Contact Input
     const mobileInputEl = document.getElementById("mobileInput");
     if (mobileInputEl) mobileInputEl.value = user.mobile || "";
 }
 
-// Paint instantly from the cache written at login (avoids a blank flash),
-// then refresh from the server so the data is always accurate.
+// Paint instantly from cache, then fetch fresh
 const cachedUserRaw = sessionStorage.getItem("cachedUser");
 if (cachedUserRaw) {
     try {
         applyUserToDashboard(JSON.parse(cachedUserRaw));
-    } catch (err) {
-        // Ignore a corrupted cache entry; the live fetch below will fix it.
-    }
+    } catch (err) {}
 }
 
 if (sessionToken) {
     fetch(`${API_BASE}/me`, {
         headers: { Authorization: `Bearer ${sessionToken}` },
     })
-        .then(async (res) => {
-            if (res.status === 401) {
-                sessionStorage.removeItem("sessionToken");
-                sessionStorage.removeItem("cachedUser");
-                window.location.href = "../login/index.html";
-                return;
-            }
+    .then(async (res) => {
+        if (res.status === 401) {
+            sessionStorage.removeItem("sessionToken");
+            sessionStorage.removeItem("cachedUser");
+            window.location.href = "index.html";
+            return;
+        }
+        const data = await res.json();
+        if (!res.ok) return;
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                console.error("Could not load profile:", data.error);
-                return;
-            }
-
-            sessionStorage.setItem("cachedUser", JSON.stringify(data.user));
-            applyUserToDashboard(data.user);
-        })
-        .catch((err) => {
-            console.error("Network error loading profile:", err);
-        });
+        // Store and apply with the real fee status!
+        sessionStorage.setItem("cachedUser", JSON.stringify(data.user));
+        applyUserToDashboard(data.user, data.feeStatus);
+    })
+    .catch((err) => console.error("Network error loading profile:", err));
 }
 
-// Clear the session before the default logout link navigates away.
 const logoutBtn = document.querySelector(".logout-btn");
 if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
@@ -111,7 +129,7 @@ const rootHtml = document.documentElement;
 const instituteLogo = document.getElementById("instituteLogo");
 
 rootHtml.setAttribute("data-theme", "light");
-if (instituteLogo) instituteLogo.src = "../../assets/images/logo.png";
+if (instituteLogo) instituteLogo.src = "logo.png"; // Fixed path
 
 themeToggleBtn.addEventListener("click", () => {
     let currentTheme = rootHtml.getAttribute("data-theme");
@@ -120,12 +138,12 @@ themeToggleBtn.addEventListener("click", () => {
         rootHtml.setAttribute("data-theme", "dark");
         themeIcon.classList.remove("fa-moon");
         themeIcon.classList.add("fa-sun");
-        if (instituteLogo) instituteLogo.src = "../../assets/images/logo_white.png";
+        if (instituteLogo) instituteLogo.src = "logo_white.png"; // Fixed path
     } else {
         rootHtml.setAttribute("data-theme", "light");
         themeIcon.classList.remove("fa-sun");
         themeIcon.classList.add("fa-moon");
-        if (instituteLogo) instituteLogo.src = "../../assets/images/logo.png";
+        if (instituteLogo) instituteLogo.src = "logo.png"; // Fixed path
     }
 });
 
@@ -224,9 +242,7 @@ const translationDictionary = {
         "Profile Details": "प्रोफ़ाइल विवरण",
         "Security & Password": "सुरक्षा और पासवर्ड",
         "Update Security": "पासवर्ड अद्यतन करें",
-        "Update Contact Info": "संपर्क जानकारी अद्यतन करें",
-        "Portal Preferences": "पोर्टल प्राथमिकताएं",
-        "Notification Preferences": "अधिसूचना प्राथमिकताएं"
+        "Update Contact Info": "संपर्क जानकारी अद्यतन करें"
     },
     bn: {
         "Home": "হোম",
@@ -240,9 +256,7 @@ const translationDictionary = {
         "Profile Details": "প্রোফাইল বিবরণ",
         "Security & Password": "সুরক্ষা এবং পাসওয়ার্ড",
         "Update Security": "পাসওয়ার্ড আপডেট করুন",
-        "Update Contact Info": "যোগাযোগের তথ্য আপডেট করুন",
-        "Portal Preferences": "পোর্টাল পছন্দসমূহ",
-        "Notification Preferences": "বিজ্ঞপ্তি পছন্দসমূহ"
+        "Update Contact Info": "যোগাযোগের তথ্য আপডেট করুন"
     }
 };
 
@@ -269,103 +283,131 @@ if (languageSelect) {
 }
 
 /*==================================================
-        DYNAMIC REGISTRATION FORM TABLES (ADD/REMOVE)
+        DYNAMIC REGISTRATION FORM TABLES (AUTOFILL)
 ==================================================*/
+const semesterSelect = document.getElementById("semesterSelect");
+const dynamicFormSections = document.getElementById("dynamicFormSections");
+
+if (semesterSelect) {
+    semesterSelect.addEventListener("change", (e) => {
+        // Unhide the rest of the form!
+        if (dynamicFormSections) dynamicFormSections.classList.remove("d-none");
+        loadCoursesForSemester(e.target.value);
+    });
+}
+
+async function loadCoursesForSemester(semester) {
+    try {
+        const res = await fetch(`http://localhost:5000/api/admin/courses/${semester}`, {
+            headers: { Authorization: `Bearer ${sessionToken}` }
+        });
+        
+        if (!res.ok) throw new Error("Failed to fetch courses");
+        
+        const courses = await res.json();
+
+        // Separate into Theory and Practical
+        const theoryCourses = courses.filter(c => c.category === 'Theory');
+        const practicalCourses = courses.filter(c => c.category === 'Practical');
+
+        renderTable('theoryTable', theoryCourses);
+        renderTable('practicalTable', practicalCourses);
+
+    } catch (err) {
+        console.error("Failed to load dynamic curriculum:", err);
+        // Fallback: 5 empty rows if server fails or no courses found
+        renderEmptyRows('theoryTable', 5);
+        renderEmptyRows('practicalTable', 5);
+    }
+}
+
+function renderTable(tableID, courses) {
+    const tbody = document.querySelector(`#${tableID} tbody`);
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    if (courses.length === 0) {
+        renderEmptyRows(tableID, 5);
+        return;
+    }
+
+    courses.forEach((course, index) => {
+        const row = tbody.insertRow();
+        const isCore = course.subjectType === 'Core';
+        const readOnlyAttr = isCore ? 'readonly class="readonly-input"' : '';
+        const disabledAttr = isCore ? 'disabled class="readonly-input"' : '';
+
+        row.insertCell(0).innerHTML = index + 1;
+        row.insertCell(1).innerHTML = `<input type="text" value="${course.courseCode || ''}" ${readOnlyAttr} required>`;
+        row.insertCell(2).innerHTML = `<input type="text" value="${course.courseName}" ${readOnlyAttr} required>`;
+        row.insertCell(3).innerHTML = isCore ? 
+            `<select ${disabledAttr} required><option value="Core" selected>Core</option></select>` :
+            `<select required><option value="Core">Core</option><option value="Elective" selected>Elective</option></select>`;
+        row.insertCell(4).innerHTML = `<input type="number" step="0.5" value="${course.credits}" ${readOnlyAttr} required>`;
+        row.insertCell(5).innerHTML = `<input type="text" placeholder="-">`;
+        
+        row.insertCell(6).innerHTML = isCore ? 
+            `<span style="color: var(--text-muted); text-align: center; display:block;"><i class="fa-solid fa-lock"></i></span>` :
+            `<button type="button" class="remove-row-btn" onclick="removeRow(this)"><i class="fa-solid fa-xmark"></i></button>`;
+    });
+}
+
+function renderEmptyRows(tableID, count) {
+    const tbody = document.querySelector(`#${tableID} tbody`);
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    for(let i=0; i<count; i++) addRow(tableID);
+}
+
 function addRow(tableID) {
-    const table = document.getElementById(tableID).getElementsByTagName('tbody')[0];
-    const rowCount = table.rows.length;
-    const row = table.insertRow(rowCount);
+    const tbody = document.querySelector(`#${tableID} tbody`);
+    if (!tbody) return;
+    const rowCount = tbody.rows.length;
+    const row = tbody.insertRow(rowCount);
     
     row.insertCell(0).innerHTML = rowCount + 1;
-    row.insertCell(1).innerHTML = '<input type="text" placeholder="Code" required>';
-    row.insertCell(2).innerHTML = '<input type="text" placeholder="Subject Name" required>';
-
-    if(tableID === 'theoryTable') {
-        row.insertCell(3).innerHTML = `
-            <select required>
-                <option value="core">Core</option>
-                <option value="elective">Elective</option>
-            </select>`;
-        row.insertCell(4).innerHTML = '<input type="number" step="0.5" min="0" placeholder="0.0" required>';
-        row.insertCell(5).innerHTML = '<input type="text" placeholder="-">';
+    row.insertCell(1).innerHTML = `<input type="text" placeholder="Code" required>`;
+    row.insertCell(2).innerHTML = `<input type="text" placeholder="Subject Name" required>`;
+    row.insertCell(3).innerHTML = `<select required><option value="Core">Core</option><option value="Elective" selected>Elective</option></select>`;
+    row.insertCell(4).innerHTML = `<input type="number" step="0.5" min="0" placeholder="0.0" required>`;
+    row.insertCell(5).innerHTML = `<input type="text" placeholder="-">`;
+    row.insertCell(6).innerHTML = `
+        <button type="button" class="remove-row-btn" onclick="removeRow(this)" title="Remove Row">
+            <i class="fa-solid fa-xmark"></i>
+        </button>`;
         
-        // Add Remove Button Cell
-        row.insertCell(6).innerHTML = `
-            <button type="button" class="remove-row-btn" onclick="removeRow(this)" title="Remove Row">
-                <i class="fa-solid fa-xmark"></i>
-            </button>`;
-    }
-    
     updateRowNumbers(tableID);
 }
 
-function removeRow(button) {
-    // Traverse up to the TR element and remove it
+window.removeRow = function(button) {
     const row = button.closest('tr');
     const tableID = row.closest('table').id;
     row.remove();
-    
-    // Recalculate Serial Numbers so they stay sequential
     updateRowNumbers(tableID);
-}
+};
 
 function updateRowNumbers(tableID) {
-    const tbody = document.getElementById(tableID).getElementsByTagName('tbody')[0];
+    const tbody = document.querySelector(`#${tableID} tbody`);
+    if(!tbody) return;
     const rows = tbody.rows;
     for (let i = 0; i < rows.length; i++) {
         rows[i].cells[0].innerText = i + 1;
     }
 }
 
-/*==================================================
-        OTP VERIFICATION LOGIC (ROCK-SOLID ENGINE)
-==================================================*/
-const otpModalOverlay = document.getElementById("otpModalOverlay");
-const cancelOtpBtn = document.getElementById("cancelOtpBtn");
-const otpForm = document.getElementById("otpForm");
-
-let otpSuccessCallback = null;
-let otpCancelCallback = null;
-
-function triggerVerificationFlow(onSuccess, onCancel = null) {
-    otpSuccessCallback = onSuccess;
-    otpCancelCallback = onCancel;
-    otpForm.reset();
-    otpModalOverlay.classList.remove("d-none");
-}
-
-function closeOtpModal() {
-    otpModalOverlay.classList.add("d-none");
-    if(otpCancelCallback) {
-        otpCancelCallback();
-    }
-    otpSuccessCallback = null;
-    otpCancelCallback = null;
-}
-
-if (cancelOtpBtn) {
-    cancelOtpBtn.addEventListener("click", closeOtpModal);
-}
-
-if (otpForm) {
-    otpForm.addEventListener("submit", (e) => {
-        e.preventDefault(); 
-        otpModalOverlay.classList.add("d-none");
-        
-        if (otpSuccessCallback) {
-            otpSuccessCallback(); 
-        }
-        
-        otpSuccessCallback = null;
-        otpCancelCallback = null;
-    });
-}
-
 window.addEventListener('load', () => {
     if (window.innerWidth <= 992) {
-        sidebar.classList.add('collapsed');
+        document.getElementById('sidebar').classList.add('collapsed');
     }
-    for(let i=0; i<5; i++) { addRow('theoryTable'); }
+    
+    setTimeout(() => {
+        if(semesterSelect && semesterSelect.value) {
+            loadCoursesForSemester(semesterSelect.value);
+        } else {
+            renderEmptyRows('theoryTable', 5);
+            renderEmptyRows('practicalTable', 5);
+        }
+    }, 500);
 
     const paymentDateInput = document.getElementById('paymentDate');
     if(paymentDateInput) {
@@ -375,74 +417,56 @@ window.addEventListener('load', () => {
 });
 
 /*==================================================
-        AVATAR (PICK FILE FIRST -> THEN VERIFY)
+        PASSWORD VERIFICATION LOGIC (SETTINGS)
 ==================================================*/
-const uploadPhotoBtn = document.getElementById("uploadPhotoBtn");
-const avatarInput = document.getElementById("avatarInput");
-const settingsAvatar = document.getElementById("settingsAvatar");
-const sidebarAvatar = document.querySelector(".sidebar .avatar");
-const removeAvatarBtn = document.getElementById("removeAvatarBtn");
+const passwordModalOverlay = document.getElementById("passwordModalOverlay");
+const cancelVerifyBtn = document.getElementById("cancelVerifyBtn");
+const passwordVerifyForm = document.getElementById("passwordVerifyForm");
 
-if (uploadPhotoBtn && avatarInput) {
-    uploadPhotoBtn.addEventListener("click", () => {
-        avatarInput.click();
-    });
+let verifySuccessCallback = null;
+let verifyCancelCallback = null;
 
-    avatarInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (file.size > 2 * 1024 * 1024) { 
-                alert("File size must be less than 2MB.");
-                avatarInput.value = "";
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const imgUrl = event.target.result;
-                
-                triggerVerificationFlow(
-                    () => {
-                        settingsAvatar.style.backgroundImage = `url('${imgUrl}')`;
-                        settingsAvatar.textContent = "";
-                        if (sidebarAvatar) {
-                            sidebarAvatar.style.backgroundImage = `url('${imgUrl}')`;
-                            sidebarAvatar.style.backgroundSize = "cover";
-                            sidebarAvatar.textContent = "";
-                        }
-                        alert("Profile picture updated securely.");
-                    }, 
-                    () => {
-                        avatarInput.value = ""; 
-                    }
-                );
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+function triggerVerificationFlow(onSuccess, onCancel = null) {
+    verifySuccessCallback = onSuccess;
+    verifyCancelCallback = onCancel;
+    passwordVerifyForm.reset();
+    
+    const icon = passwordVerifyForm.querySelector('.toggle-password');
+    if (icon) {
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        passwordVerifyForm.querySelector('input').type = 'password';
+    }
+
+    passwordModalOverlay.classList.remove("d-none");
+    setTimeout(() => passwordVerifyForm.querySelector('input').focus(), 100);
 }
 
-if (removeAvatarBtn) {
-    removeAvatarBtn.addEventListener("click", () => {
-        triggerVerificationFlow(() => {
-            settingsAvatar.style.backgroundImage = "none";
-            settingsAvatar.textContent = "AB";
-            if (sidebarAvatar) {
-                sidebarAvatar.style.backgroundImage = "none";
-                sidebarAvatar.textContent = "AB";
-            }
-            avatarInput.value = "";
-            alert("Profile picture removed securely.");
-        });
+function closeVerifyModal() {
+    passwordModalOverlay.classList.add("d-none");
+    if(verifyCancelCallback) verifyCancelCallback();
+    verifySuccessCallback = null;
+    verifyCancelCallback = null;
+}
+
+if (cancelVerifyBtn) cancelVerifyBtn.addEventListener("click", closeVerifyModal);
+
+if (passwordVerifyForm) {
+    passwordVerifyForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); 
+        passwordModalOverlay.classList.add("d-none");
+        if (verifySuccessCallback) verifySuccessCallback(); 
+        verifySuccessCallback = null;
+        verifyCancelCallback = null;
     });
 }
 
 /*==================================================
-        MOBILE NUMBER (VERIFY BEFORE EDIT)
+        AVATAR & CONTACT INFO EDITING
 ==================================================*/
 const editMobileBtn = document.getElementById("editMobileBtn");
 const mobileInput = document.getElementById("mobileInput");
 const saveMobileBtn = document.getElementById("saveMobileBtn");
-const contactForm = document.getElementById('contactForm');
 
 if (editMobileBtn) {
     editMobileBtn.addEventListener("click", () => {
@@ -455,97 +479,103 @@ if (editMobileBtn) {
     });
 }
 
-if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        alert("Mobile number updated successfully!");
-        mobileInput.setAttribute("readonly", "true");
-        mobileInput.classList.add("readonly-input");
-        saveMobileBtn.setAttribute("disabled", "true");
-    });
-}
-
-/*==================================================
-        SECURITY FORM (VERIFY TO SAVE)
-==================================================*/
-const securityForm = document.getElementById('securityForm');
-if(securityForm) {
-    securityForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const newPass = document.getElementById('newPass').value;
-        const confirmPass = document.getElementById('confirmPass').value;
-        
-        if (newPass !== confirmPass) {
-            alert("Your new passwords do not match. Please try again.");
-            return;
-        }
-        
-        triggerVerificationFlow(() => {
-            alert("Password updated securely!");
-            securityForm.reset();
-            
-            // Re-hide passwords after submit reset
-            const icons = securityForm.querySelectorAll('.toggle-password');
-            icons.forEach(icon => {
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-                icon.title = "Show Password";
-            });
-        });
-    });
-}
-
 /*==================================================
         PASSWORD VISIBILITY TOGGLE
 ==================================================*/
 const togglePasswordBtns = document.querySelectorAll('.toggle-password');
-
 togglePasswordBtns.forEach(btn => {
     btn.addEventListener('click', function() {
         const input = this.previousElementSibling; 
-        
         if (input.type === 'password') {
             input.type = 'text';
             this.classList.remove('fa-eye');
             this.classList.add('fa-eye-slash');
-            this.title = "Hide Password";
         } else {
             input.type = 'password';
             this.classList.remove('fa-eye-slash');
             this.classList.add('fa-eye');
-            this.title = "Show Password";
         }
     });
 });
 
-// Registration Form Submit
+/*==================================================
+        REGISTRATION FORM SUBMISSION
+==================================================*/
 const regForm = document.getElementById('regForm');
-if(regForm) {
-    regForm.addEventListener('submit', (e) => {
+if (regForm) {
+    regForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        alert("Registration form submitted successfully!");
+        
+        const submitBtn = regForm.querySelector('.submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+        const subjects = [];
+        
+        // Loop through both Theory and Practical tables to gather all subjects
+        ['theoryTable', 'practicalTable'].forEach(tableID => {
+            const tbody = document.querySelector(`#${tableID} tbody`);
+            if (tbody) {
+                for (let row of tbody.rows) {
+                    const code = row.cells[1].querySelector('input').value;
+                    const name = row.cells[2].querySelector('input').value;
+                    const type = row.cells[3].querySelector('select').value;
+                    const credit = row.cells[4].querySelector('input').value;
+                    if (code && name) {
+                        subjects.push({ 
+                            code, 
+                            name, 
+                            type, 
+                            credit, 
+                            category: tableID === 'theoryTable' ? 'Theory' : 'Practical' 
+                        });
+                    }
+                }
+            }
+        });
+
+        const payload = {
+            semester: document.querySelector('select:not([disabled])').value, 
+            paymentDate: document.getElementById('paymentDate').value,
+            subjects: subjects
+        };
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/registration/submit`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${sessionToken}` },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            
+            if (res.ok) {
+                alert("Success! Your semester registration has been submitted.");
+                document.querySelector('.nav-item[data-target="view-pdf"]').click();
+            } else {
+                alert(data.error || "Submission failed.");
+            }
+        } catch (err) {
+            alert("Network error occurred.");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Application";
+        }
     });
 }
-
-
 
 /* ==================================================
    GENERATE REGISTRATION PDF
 ================================================== */
-
-const pdfNavItem = document.querySelector(
-    '.nav-item[data-target="view-pdf"]'
-);
-
+const pdfNavItem = document.querySelector('.nav-item[data-target="view-pdf"]');
 const pdfViewer = document.getElementById("pdfViewer");
 const pdfLoading = document.getElementById("pdfLoading");
 const pdfError = document.getElementById("pdfError");
 
 if (pdfNavItem) {
     pdfNavItem.addEventListener("click", async () => {
-
         if (!sessionToken) {
-            window.location.href = "../login/index.html";
+            window.location.href = "index.html";
             return;
         }
 
@@ -554,40 +584,19 @@ if (pdfNavItem) {
         pdfViewer.removeAttribute("src");
 
         try {
-            const response = await fetch(
-                "http://localhost:5000/api/generatePdf",
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${sessionToken}`
-                    }
-                }
-            );
+            const response = await fetch("http://localhost:5000/api/generatePdf", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${sessionToken}` }
+            });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-
-                throw new Error(
-                    errorData?.message ||
-                    "Failed to generate PDF."
-                );
-            }
-
+            if (!response.ok) throw new Error("Failed to generate PDF.");
+            
             const pdfBlob = await response.blob();
-
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-
-            pdfViewer.src = pdfUrl;
+            pdfViewer.src = URL.createObjectURL(pdfBlob);
 
         } catch (error) {
-
-            console.error("PDF generation error:", error);
-
-            pdfError.textContent =
-                error.message || "Could not generate PDF.";
-
+            pdfError.textContent = error.message || "Could not generate PDF.";
             pdfError.classList.remove("d-none");
-
         } finally {
             pdfLoading.classList.add("d-none");
         }

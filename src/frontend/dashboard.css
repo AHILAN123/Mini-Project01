@@ -142,13 +142,34 @@ body {
 [data-theme="dark"] .nav-item.active { color: var(--primary-light); }
 
 .sidebar-footer { margin-top: auto; border-top: 1px solid var(--glass-border); padding-top: 20px; }
-.user-profile { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; white-space: nowrap; }
+
+/* FIX: Profile Text Truncation */
+.user-profile { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    margin-bottom: 20px; 
+}
+.user-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0; 
+    flex: 1;
+}
+.user-info .name, 
+.user-info .roll { 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
 .avatar {
-    width: 42px; height: 42px; border-radius: 50%;
+    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700;
 }
-.user-info .name { display: block; font-size: 0.95rem; font-weight: 600; color: var(--text-main); }
+.user-info .name { font-size: 0.95rem; font-weight: 600; color: var(--text-main); }
 .user-info .roll { font-size: 0.75rem; color: var(--text-muted); }
 
 .logout-btn {
@@ -162,6 +183,21 @@ body {
 /* Main Content area */
 .main-content {
     flex: 1; display: flex; flex-direction: column; gap: 20px; overflow: hidden;
+}
+
+/* FIX: SPA View Section Fade Up */
+.view-section {
+    animation: fadeUp 0.3s ease forwards;
+}
+@keyframes fadeUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
 }
 
 /* Topbar */
@@ -302,14 +338,13 @@ footer { text-align: center; color: var(--text-muted); font-size: 12px; padding-
     .topbar { flex-direction: column; gap: 20px; padding: 20px; }
     .topbar-left { flex-direction: column; width: 100%; }
     
-    /* Make sidebar hidden by default on mobile, can be opened via JS */
     .sidebar { position: absolute; z-index: 999; height: calc(100vh - 20px); box-shadow: var(--shadow); }
     .sidebar.collapsed { width: 0; }
 }
 
 @media(max-width: 600px) {
     .status-cards { grid-template-columns: 1fr; }
-    .action-btn { padding: 10px; font-size: 0; } /* Hide text on small screens */
+    .action-btn { padding: 10px; font-size: 0; } 
     .action-btn i { font-size: 1.2rem; margin: 0; }
     .dropdown-content a { font-size: 1rem; }
 }
@@ -370,7 +405,6 @@ footer { text-align: center; color: var(--text-muted); font-size: 12px; padding-
     font-size: 1.05rem;
 }
 
-/* Hide Google Translate Branding Banner */
 .goog-te-banner-frame { display: none !important; }
 body { top: 0px !important; }
 
@@ -411,7 +445,6 @@ body { top: 0px !important; }
     transform: scale(0.8);
 }
 
-/* Ensure disabled inputs look like readonly */
 select:disabled {
     background: var(--glass-bg) !important;
     color: var(--text-muted) !important;
@@ -464,7 +497,7 @@ select:disabled {
 }
 
 .password-wrapper .glass-input {
-    padding-right: 40px; /* Leaves space so text doesn't type under the icon */
+    padding-right: 40px; 
 }
 
 .toggle-password {
@@ -576,17 +609,14 @@ select:disabled {
     transform: scale(1.1);
 }
 
-/* Align table elements slightly better */
 .glass-table th:last-child, 
 .glass-table td:last-child {
     text-align: center;
 }
 
-
 /* ==============================
    PDF VIEWER
 ============================== */
-
 .pdf-container {
     width: 100%;
     margin-top: 20px;

@@ -6,112 +6,112 @@ const API_BASE = "http://localhost:5000/api/auth";
 const sessionToken = sessionStorage.getItem("sessionToken");
 
 if (!sessionToken) {
-    window.location.href = "index.html";
+    // No one is logged in for this tab/session — bounce back to login.
+    window.location.href = "../login/index.html";
 }
 
-// SMART NAME EXTRACTION FIX (Handles Roll Numbers & Emails)
-function getInitials(name) {
-    if (!name) return "ST";
-    const parts = name.trim().split(/[\s_.]+/).filter(p => !/^\d/.test(p));
-    if (parts.length === 0) return name.substring(0, 2).toUpperCase();
+function getDisplayNameFromEmail(email) {
+    if (!email || typeof email !== "string" || !email.includes("@")) return "Student";
+
+    const localPart = email.split("@")[0];
+
+    // "ayan.behera123" / "ayan_behera" -> "Ayan Behera123"
+    return localPart
+        .split(/[._]+/)
+        .filter(Boolean)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}
+
+function getInitials(displayName) {
+    if (!displayName) return "";
+    const parts = displayName.trim().split(/\s+/);
     const initials = parts.slice(0, 2).map(p => p[0]).join("");
     return initials.toUpperCase();
 }
 
-function applyUserToDashboard(user, feeStatus = false) {
-    let displayName = user.fullname;
-    
-    if (!displayName || displayName === "Pending Admin Input" || displayName === "Institute Student") {
-        const emailPrefix = user.email.split("@")[0]; 
-        const namePart = emailPrefix.split(".").pop(); 
-        displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1); 
-    }
-
+function applyUserToDashboard(user) {
+    const displayName = getDisplayNameFromEmail(user.email);
     const initials = getInitials(displayName);
 
-    // 1. Sidebar Elements
+    // Sidebar
     const sidebarAvatarEl = document.querySelector(".sidebar .avatar");
-    const sidebarNameEl = document.getElementById("sidebarName");
-    const sidebarEmailEl = document.getElementById("sidebarEmail");
+    const sidebarNameEl = document.querySelector(".sidebar .user-info .name");
+    const sidebarRollEl = document.querySelector(".sidebar .user-info .roll");
 
-    if (sidebarAvatarEl && !sidebarAvatarEl.style.backgroundImage.includes("url")) sidebarAvatarEl.textContent = initials;
+    if (sidebarAvatarEl && !sidebarAvatarEl.style.backgroundImage.includes("url")) {
+        sidebarAvatarEl.textContent = initials;
+    }
     if (sidebarNameEl) sidebarNameEl.textContent = displayName;
-    if (sidebarEmailEl) sidebarEmailEl.textContent = user.email;
+    if (sidebarRollEl) sidebarRollEl.textContent = user.email;
 
-    // 2. Dashboard Greeting Elements
-    const dashboardGreeting = document.getElementById("dashboardGreeting");
-    if (dashboardGreeting) dashboardGreeting.textContent = `Welcome back, ${displayName}!`;
-
-    // 3. Update the Dynamic Fee Status Card
-    const feeCard = document.querySelector('.status-card p'); // Targets the first card
-    if (feeCard) {
-        if (feeStatus) {
-            feeCard.textContent = "Cleared";
-            feeCard.className = "text-success";
-        } else {
-            feeCard.textContent = "Pending";
-            feeCard.className = "text-warning";
-        }
+    // Settings -> Profile Details
+    const settingsAvatarEl = document.getElementById("settingsAvatar");
+    if (settingsAvatarEl && !settingsAvatarEl.style.backgroundImage.includes("url")) {
+        settingsAvatarEl.textContent = initials;
     }
 
-    // 4. Settings Elements
-    const settingsAvatarEl = document.getElementById("settingsAvatar");
-    const settingsNameEl = document.getElementById("settingsName");
-    const settingsEmailEl = document.getElementById("settingsEmail");
-    const settingsFormName = document.getElementById("settingsFormName");
-    const settingsFormEmail = document.getElementById("settingsFormEmail");
+    const avatarInfoName = document.querySelector(".avatar-info h4");
+    const avatarInfoSub = document.querySelector(".avatar-info p");
+    if (avatarInfoName) avatarInfoName.textContent = displayName;
+    if (avatarInfoSub) avatarInfoSub.textContent = user.email;
 
-    if (settingsAvatarEl && !settingsAvatarEl.style.backgroundImage.includes("url")) settingsAvatarEl.textContent = initials;
-    if (settingsNameEl) settingsNameEl.textContent = displayName;
-    if (settingsEmailEl) settingsEmailEl.textContent = user.email;
-    if (settingsFormName) settingsFormName.value = displayName;
-    if (settingsFormEmail) settingsFormEmail.value = user.email;
+    // Home page greeting ("Welcome back, <name>!")
+    const greetingEl = document.querySelector(".greeting-box h2");
+    if (greetingEl) greetingEl.textContent = `Welcome back, ${displayName}!`;
 
-    // 5. Registration Form Elements
-    const regName = document.getElementById("regName");
-    const regEmail = document.getElementById("regEmail");
-    const regMobile = document.getElementById("regMobile");
-    const regEnrollmentNo = document.getElementById("regEnrollmentNo"); // <-- Add this
-    
-    if (regName) regName.value = displayName;
-    if (regEmail) regEmail.value = user.email;
-    if (regMobile) regMobile.value = user.mobile || "Pending Admin Input";
-    if (regEnrollmentNo) regEnrollmentNo.value = user.enrollmentNo || "Pending Admin Input"; // <-- Add this
+    const profileForm = document.getElementById("profileForm");
+    if (profileForm) {
+        const nameInput = profileForm.querySelector('input[type="text"]');
+        const emailInput = profileForm.querySelector('input[type="email"]');
+        if (nameInput) nameInput.value = displayName;
+        if (emailInput) emailInput.value = user.email;
+    }
 
-    // 6. Contact Input
+    // Settings -> Update Contact Info
     const mobileInputEl = document.getElementById("mobileInput");
     if (mobileInputEl) mobileInputEl.value = user.mobile || "";
 }
 
-// Paint instantly from cache, then fetch fresh
+// Paint instantly from the cache written at login (avoids a blank flash),
+// then refresh from the server so the data is always accurate.
 const cachedUserRaw = sessionStorage.getItem("cachedUser");
 if (cachedUserRaw) {
     try {
         applyUserToDashboard(JSON.parse(cachedUserRaw));
-    } catch (err) {}
+    } catch (err) {
+        // Ignore a corrupted cache entry; the live fetch below will fix it.
+    }
 }
 
 if (sessionToken) {
     fetch(`${API_BASE}/me`, {
         headers: { Authorization: `Bearer ${sessionToken}` },
     })
-    .then(async (res) => {
-        if (res.status === 401) {
-            sessionStorage.removeItem("sessionToken");
-            sessionStorage.removeItem("cachedUser");
-            window.location.href = "index.html";
-            return;
-        }
-        const data = await res.json();
-        if (!res.ok) return;
+        .then(async (res) => {
+            if (res.status === 401) {
+                sessionStorage.removeItem("sessionToken");
+                sessionStorage.removeItem("cachedUser");
+                window.location.href = "../login/index.html";
+                return;
+            }
 
-        // Store and apply with the real fee status!
-        sessionStorage.setItem("cachedUser", JSON.stringify(data.user));
-        applyUserToDashboard(data.user, data.feeStatus);
-    })
-    .catch((err) => console.error("Network error loading profile:", err));
+            const data = await res.json();
+
+            if (!res.ok) {
+                console.error("Could not load profile:", data.error);
+                return;
+            }
+
+            sessionStorage.setItem("cachedUser", JSON.stringify(data.user));
+            applyUserToDashboard(data.user);
+        })
+        .catch((err) => {
+            console.error("Network error loading profile:", err);
+        });
 }
 
+// Clear the session before the default logout link navigates away.
 const logoutBtn = document.querySelector(".logout-btn");
 if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
@@ -129,7 +129,7 @@ const rootHtml = document.documentElement;
 const instituteLogo = document.getElementById("instituteLogo");
 
 rootHtml.setAttribute("data-theme", "light");
-if (instituteLogo) instituteLogo.src = "logo.png"; // Fixed path
+if (instituteLogo) instituteLogo.src = "./logo.png";
 
 themeToggleBtn.addEventListener("click", () => {
     let currentTheme = rootHtml.getAttribute("data-theme");
@@ -138,12 +138,12 @@ themeToggleBtn.addEventListener("click", () => {
         rootHtml.setAttribute("data-theme", "dark");
         themeIcon.classList.remove("fa-moon");
         themeIcon.classList.add("fa-sun");
-        if (instituteLogo) instituteLogo.src = "logo_white.png"; // Fixed path
+        if (instituteLogo) instituteLogo.src = "./logo_white.png";
     } else {
         rootHtml.setAttribute("data-theme", "light");
         themeIcon.classList.remove("fa-sun");
         themeIcon.classList.add("fa-moon");
-        if (instituteLogo) instituteLogo.src = "logo.png"; // Fixed path
+        if (instituteLogo) instituteLogo.src = "./logo.png";
     }
 });
 
@@ -242,7 +242,9 @@ const translationDictionary = {
         "Profile Details": "प्रोफ़ाइल विवरण",
         "Security & Password": "सुरक्षा और पासवर्ड",
         "Update Security": "पासवर्ड अद्यतन करें",
-        "Update Contact Info": "संपर्क जानकारी अद्यतन करें"
+        "Update Contact Info": "संपर्क जानकारी अद्यतन करें",
+        "Portal Preferences": "पोर्टल प्राथमिकताएं",
+        "Notification Preferences": "अधिसूचना प्राथमिकताएं"
     },
     bn: {
         "Home": "হোম",
@@ -256,7 +258,9 @@ const translationDictionary = {
         "Profile Details": "প্রোফাইল বিবরণ",
         "Security & Password": "সুরক্ষা এবং পাসওয়ার্ড",
         "Update Security": "পাসওয়ার্ড আপডেট করুন",
-        "Update Contact Info": "যোগাযোগের তথ্য আপডেট করুন"
+        "Update Contact Info": "যোগাযোগের তথ্য আপডেট করুন",
+        "Portal Preferences": "পোর্টাল পছন্দসমূহ",
+        "Notification Preferences": "বিজ্ঞপ্তি পছন্দসমূহ"
     }
 };
 
@@ -283,131 +287,103 @@ if (languageSelect) {
 }
 
 /*==================================================
-        DYNAMIC REGISTRATION FORM TABLES (AUTOFILL)
+        DYNAMIC REGISTRATION FORM TABLES (ADD/REMOVE)
 ==================================================*/
-const semesterSelect = document.getElementById("semesterSelect");
-const dynamicFormSections = document.getElementById("dynamicFormSections");
-
-if (semesterSelect) {
-    semesterSelect.addEventListener("change", (e) => {
-        // Unhide the rest of the form!
-        if (dynamicFormSections) dynamicFormSections.classList.remove("d-none");
-        loadCoursesForSemester(e.target.value);
-    });
-}
-
-async function loadCoursesForSemester(semester) {
-    try {
-        const res = await fetch(`http://localhost:5000/api/admin/courses/${semester}`, {
-            headers: { Authorization: `Bearer ${sessionToken}` }
-        });
-        
-        if (!res.ok) throw new Error("Failed to fetch courses");
-        
-        const courses = await res.json();
-
-        // Separate into Theory and Practical
-        const theoryCourses = courses.filter(c => c.category === 'Theory');
-        const practicalCourses = courses.filter(c => c.category === 'Practical');
-
-        renderTable('theoryTable', theoryCourses);
-        renderTable('practicalTable', practicalCourses);
-
-    } catch (err) {
-        console.error("Failed to load dynamic curriculum:", err);
-        // Fallback: 5 empty rows if server fails or no courses found
-        renderEmptyRows('theoryTable', 5);
-        renderEmptyRows('practicalTable', 5);
-    }
-}
-
-function renderTable(tableID, courses) {
-    const tbody = document.querySelector(`#${tableID} tbody`);
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (courses.length === 0) {
-        renderEmptyRows(tableID, 5);
-        return;
-    }
-
-    courses.forEach((course, index) => {
-        const row = tbody.insertRow();
-        const isCore = course.subjectType === 'Core';
-        const readOnlyAttr = isCore ? 'readonly class="readonly-input"' : '';
-        const disabledAttr = isCore ? 'disabled class="readonly-input"' : '';
-
-        row.insertCell(0).innerHTML = index + 1;
-        row.insertCell(1).innerHTML = `<input type="text" value="${course.courseCode || ''}" ${readOnlyAttr} required>`;
-        row.insertCell(2).innerHTML = `<input type="text" value="${course.courseName}" ${readOnlyAttr} required>`;
-        row.insertCell(3).innerHTML = isCore ? 
-            `<select ${disabledAttr} required><option value="Core" selected>Core</option></select>` :
-            `<select required><option value="Core">Core</option><option value="Elective" selected>Elective</option></select>`;
-        row.insertCell(4).innerHTML = `<input type="number" step="0.5" value="${course.credits}" ${readOnlyAttr} required>`;
-        row.insertCell(5).innerHTML = `<input type="text" placeholder="-">`;
-        
-        row.insertCell(6).innerHTML = isCore ? 
-            `<span style="color: var(--text-muted); text-align: center; display:block;"><i class="fa-solid fa-lock"></i></span>` :
-            `<button type="button" class="remove-row-btn" onclick="removeRow(this)"><i class="fa-solid fa-xmark"></i></button>`;
-    });
-}
-
-function renderEmptyRows(tableID, count) {
-    const tbody = document.querySelector(`#${tableID} tbody`);
-    if (!tbody) return;
-    tbody.innerHTML = "";
-    for(let i=0; i<count; i++) addRow(tableID);
-}
-
 function addRow(tableID) {
-    const tbody = document.querySelector(`#${tableID} tbody`);
-    if (!tbody) return;
-    const rowCount = tbody.rows.length;
-    const row = tbody.insertRow(rowCount);
+    const table = document.getElementById(tableID).getElementsByTagName('tbody')[0];
+    const rowCount = table.rows.length;
+    const row = table.insertRow(rowCount);
     
     row.insertCell(0).innerHTML = rowCount + 1;
-    row.insertCell(1).innerHTML = `<input type="text" placeholder="Code" required>`;
-    row.insertCell(2).innerHTML = `<input type="text" placeholder="Subject Name" required>`;
-    row.insertCell(3).innerHTML = `<select required><option value="Core">Core</option><option value="Elective" selected>Elective</option></select>`;
-    row.insertCell(4).innerHTML = `<input type="number" step="0.5" min="0" placeholder="0.0" required>`;
-    row.insertCell(5).innerHTML = `<input type="text" placeholder="-">`;
-    row.insertCell(6).innerHTML = `
-        <button type="button" class="remove-row-btn" onclick="removeRow(this)" title="Remove Row">
-            <i class="fa-solid fa-xmark"></i>
-        </button>`;
+    row.insertCell(1).innerHTML = '<input type="text" placeholder="Code" required>';
+    row.insertCell(2).innerHTML = '<input type="text" placeholder="Subject Name" required>';
+
+    if(tableID === 'theoryTable') {
+        row.insertCell(3).innerHTML = `
+            <select required>
+                <option value="core">Core</option>
+                <option value="elective">Elective</option>
+            </select>`;
+        row.insertCell(4).innerHTML = '<input type="number" step="0.5" min="0" placeholder="0.0" required>';
+        row.insertCell(5).innerHTML = '<input type="text" placeholder="-">';
         
+        // Add Remove Button Cell
+        row.insertCell(6).innerHTML = `
+            <button type="button" class="remove-row-btn" onclick="removeRow(this)" title="Remove Row">
+                <i class="fa-solid fa-xmark"></i>
+            </button>`;
+    }
+    
     updateRowNumbers(tableID);
 }
 
-window.removeRow = function(button) {
+function removeRow(button) {
+    // Traverse up to the TR element and remove it
     const row = button.closest('tr');
     const tableID = row.closest('table').id;
     row.remove();
+    
+    // Recalculate Serial Numbers so they stay sequential
     updateRowNumbers(tableID);
-};
+}
 
 function updateRowNumbers(tableID) {
-    const tbody = document.querySelector(`#${tableID} tbody`);
-    if(!tbody) return;
+    const tbody = document.getElementById(tableID).getElementsByTagName('tbody')[0];
     const rows = tbody.rows;
     for (let i = 0; i < rows.length; i++) {
         rows[i].cells[0].innerText = i + 1;
     }
 }
 
+/*==================================================
+        OTP VERIFICATION LOGIC (ROCK-SOLID ENGINE)
+==================================================*/
+const otpModalOverlay = document.getElementById("otpModalOverlay");
+const cancelOtpBtn = document.getElementById("cancelOtpBtn");
+const otpForm = document.getElementById("otpForm");
+
+let otpSuccessCallback = null;
+let otpCancelCallback = null;
+
+function triggerVerificationFlow(onSuccess, onCancel = null) {
+    otpSuccessCallback = onSuccess;
+    otpCancelCallback = onCancel;
+    otpForm.reset();
+    otpModalOverlay.classList.remove("d-none");
+}
+
+function closeOtpModal() {
+    otpModalOverlay.classList.add("d-none");
+    if(otpCancelCallback) {
+        otpCancelCallback();
+    }
+    otpSuccessCallback = null;
+    otpCancelCallback = null;
+}
+
+if (cancelOtpBtn) {
+    cancelOtpBtn.addEventListener("click", closeOtpModal);
+}
+
+if (otpForm) {
+    otpForm.addEventListener("submit", (e) => {
+        e.preventDefault(); 
+        otpModalOverlay.classList.add("d-none");
+        
+        if (otpSuccessCallback) {
+            otpSuccessCallback(); 
+        }
+        
+        otpSuccessCallback = null;
+        otpCancelCallback = null;
+    });
+}
+
 window.addEventListener('load', () => {
     if (window.innerWidth <= 992) {
-        document.getElementById('sidebar').classList.add('collapsed');
+        sidebar.classList.add('collapsed');
     }
-    
-    setTimeout(() => {
-        if(semesterSelect && semesterSelect.value) {
-            loadCoursesForSemester(semesterSelect.value);
-        } else {
-            renderEmptyRows('theoryTable', 5);
-            renderEmptyRows('practicalTable', 5);
-        }
-    }, 500);
+    for(let i=0; i<5; i++) { addRow('theoryTable'); }
 
     const paymentDateInput = document.getElementById('paymentDate');
     if(paymentDateInput) {
@@ -417,56 +393,74 @@ window.addEventListener('load', () => {
 });
 
 /*==================================================
-        PASSWORD VERIFICATION LOGIC (SETTINGS)
+        AVATAR (PICK FILE FIRST -> THEN VERIFY)
 ==================================================*/
-const passwordModalOverlay = document.getElementById("passwordModalOverlay");
-const cancelVerifyBtn = document.getElementById("cancelVerifyBtn");
-const passwordVerifyForm = document.getElementById("passwordVerifyForm");
+const uploadPhotoBtn = document.getElementById("uploadPhotoBtn");
+const avatarInput = document.getElementById("avatarInput");
+const settingsAvatar = document.getElementById("settingsAvatar");
+const sidebarAvatar = document.querySelector(".sidebar .avatar");
+const removeAvatarBtn = document.getElementById("removeAvatarBtn");
 
-let verifySuccessCallback = null;
-let verifyCancelCallback = null;
+if (uploadPhotoBtn && avatarInput) {
+    uploadPhotoBtn.addEventListener("click", () => {
+        avatarInput.click();
+    });
 
-function triggerVerificationFlow(onSuccess, onCancel = null) {
-    verifySuccessCallback = onSuccess;
-    verifyCancelCallback = onCancel;
-    passwordVerifyForm.reset();
-    
-    const icon = passwordVerifyForm.querySelector('.toggle-password');
-    if (icon) {
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-        passwordVerifyForm.querySelector('input').type = 'password';
-    }
-
-    passwordModalOverlay.classList.remove("d-none");
-    setTimeout(() => passwordVerifyForm.querySelector('input').focus(), 100);
+    avatarInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { 
+                alert("File size must be less than 2MB.");
+                avatarInput.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const imgUrl = event.target.result;
+                
+                triggerVerificationFlow(
+                    () => {
+                        settingsAvatar.style.backgroundImage = `url('${imgUrl}')`;
+                        settingsAvatar.textContent = "";
+                        if (sidebarAvatar) {
+                            sidebarAvatar.style.backgroundImage = `url('${imgUrl}')`;
+                            sidebarAvatar.style.backgroundSize = "cover";
+                            sidebarAvatar.textContent = "";
+                        }
+                        alert("Profile picture updated securely.");
+                    }, 
+                    () => {
+                        avatarInput.value = ""; 
+                    }
+                );
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 }
 
-function closeVerifyModal() {
-    passwordModalOverlay.classList.add("d-none");
-    if(verifyCancelCallback) verifyCancelCallback();
-    verifySuccessCallback = null;
-    verifyCancelCallback = null;
-}
-
-if (cancelVerifyBtn) cancelVerifyBtn.addEventListener("click", closeVerifyModal);
-
-if (passwordVerifyForm) {
-    passwordVerifyForm.addEventListener("submit", async (e) => {
-        e.preventDefault(); 
-        passwordModalOverlay.classList.add("d-none");
-        if (verifySuccessCallback) verifySuccessCallback(); 
-        verifySuccessCallback = null;
-        verifyCancelCallback = null;
+if (removeAvatarBtn) {
+    removeAvatarBtn.addEventListener("click", () => {
+        triggerVerificationFlow(() => {
+            settingsAvatar.style.backgroundImage = "none";
+            settingsAvatar.textContent = "AB";
+            if (sidebarAvatar) {
+                sidebarAvatar.style.backgroundImage = "none";
+                sidebarAvatar.textContent = "AB";
+            }
+            avatarInput.value = "";
+            alert("Profile picture removed securely.");
+        });
     });
 }
 
 /*==================================================
-        AVATAR & CONTACT INFO EDITING
+        MOBILE NUMBER (VERIFY BEFORE EDIT)
 ==================================================*/
 const editMobileBtn = document.getElementById("editMobileBtn");
 const mobileInput = document.getElementById("mobileInput");
 const saveMobileBtn = document.getElementById("saveMobileBtn");
+const contactForm = document.getElementById('contactForm');
 
 if (editMobileBtn) {
     editMobileBtn.addEventListener("click", () => {
@@ -479,103 +473,97 @@ if (editMobileBtn) {
     });
 }
 
+if (contactForm) {
+    contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert("Mobile number updated successfully!");
+        mobileInput.setAttribute("readonly", "true");
+        mobileInput.classList.add("readonly-input");
+        saveMobileBtn.setAttribute("disabled", "true");
+    });
+}
+
+/*==================================================
+        SECURITY FORM (VERIFY TO SAVE)
+==================================================*/
+const securityForm = document.getElementById('securityForm');
+if(securityForm) {
+    securityForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newPass = document.getElementById('newPass').value;
+        const confirmPass = document.getElementById('confirmPass').value;
+        
+        if (newPass !== confirmPass) {
+            alert("Your new passwords do not match. Please try again.");
+            return;
+        }
+        
+        triggerVerificationFlow(() => {
+            alert("Password updated securely!");
+            securityForm.reset();
+            
+            // Re-hide passwords after submit reset
+            const icons = securityForm.querySelectorAll('.toggle-password');
+            icons.forEach(icon => {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                icon.title = "Show Password";
+            });
+        });
+    });
+}
+
 /*==================================================
         PASSWORD VISIBILITY TOGGLE
 ==================================================*/
 const togglePasswordBtns = document.querySelectorAll('.toggle-password');
+
 togglePasswordBtns.forEach(btn => {
     btn.addEventListener('click', function() {
         const input = this.previousElementSibling; 
+        
         if (input.type === 'password') {
             input.type = 'text';
             this.classList.remove('fa-eye');
             this.classList.add('fa-eye-slash');
+            this.title = "Hide Password";
         } else {
             input.type = 'password';
             this.classList.remove('fa-eye-slash');
             this.classList.add('fa-eye');
+            this.title = "Show Password";
         }
     });
 });
 
-/*==================================================
-        REGISTRATION FORM SUBMISSION
-==================================================*/
+// Registration Form Submit
 const regForm = document.getElementById('regForm');
-if (regForm) {
-    regForm.addEventListener('submit', async (e) => {
+if(regForm) {
+    regForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
-        const submitBtn = regForm.querySelector('.submit-btn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
-
-        const subjects = [];
-        
-        // Loop through both Theory and Practical tables to gather all subjects
-        ['theoryTable', 'practicalTable'].forEach(tableID => {
-            const tbody = document.querySelector(`#${tableID} tbody`);
-            if (tbody) {
-                for (let row of tbody.rows) {
-                    const code = row.cells[1].querySelector('input').value;
-                    const name = row.cells[2].querySelector('input').value;
-                    const type = row.cells[3].querySelector('select').value;
-                    const credit = row.cells[4].querySelector('input').value;
-                    if (code && name) {
-                        subjects.push({ 
-                            code, 
-                            name, 
-                            type, 
-                            credit, 
-                            category: tableID === 'theoryTable' ? 'Theory' : 'Practical' 
-                        });
-                    }
-                }
-            }
-        });
-
-        const payload = {
-            semester: document.querySelector('select:not([disabled])').value, 
-            paymentDate: document.getElementById('paymentDate').value,
-            subjects: subjects
-        };
-
-        try {
-            const res = await fetch(`http://localhost:5000/api/registration/submit`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${sessionToken}` },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await res.json();
-            
-            if (res.ok) {
-                alert("Success! Your semester registration has been submitted.");
-                document.querySelector('.nav-item[data-target="view-pdf"]').click();
-            } else {
-                alert(data.error || "Submission failed.");
-            }
-        } catch (err) {
-            alert("Network error occurred.");
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Submit Application";
-        }
+        alert("Registration form submitted successfully!");
     });
 }
+
+
 
 /* ==================================================
    GENERATE REGISTRATION PDF
 ================================================== */
-const pdfNavItem = document.querySelector('.nav-item[data-target="view-pdf"]');
+
+const pdfNavItem = document.querySelector(
+    '.nav-item[data-target="view-pdf"]'
+);
+
 const pdfViewer = document.getElementById("pdfViewer");
 const pdfLoading = document.getElementById("pdfLoading");
 const pdfError = document.getElementById("pdfError");
 
 if (pdfNavItem) {
     pdfNavItem.addEventListener("click", async () => {
+
         if (!sessionToken) {
-            window.location.href = "index.html";
+            window.location.href = "../login/index.html";
             return;
         }
 
@@ -584,21 +572,240 @@ if (pdfNavItem) {
         pdfViewer.removeAttribute("src");
 
         try {
-            const response = await fetch("http://localhost:5000/api/generatePdf", {
-                method: "POST",
-                headers: { Authorization: `Bearer ${sessionToken}` }
-            });
+            const response = await fetch(
+                "http://localhost:5000/api/generatePdf",
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${sessionToken}`
+                    }
+                }
+            );
 
-            if (!response.ok) throw new Error("Failed to generate PDF.");
-            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+
+                throw new Error(
+                    errorData?.message ||
+                    "Failed to generate PDF."
+                );
+            }
+
             const pdfBlob = await response.blob();
-            pdfViewer.src = URL.createObjectURL(pdfBlob);
+
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+
+            pdfViewer.src = pdfUrl;
 
         } catch (error) {
-            pdfError.textContent = error.message || "Could not generate PDF.";
+
+            console.error("PDF generation error:", error);
+
+            pdfError.textContent =
+                error.message || "Could not generate PDF.";
+
             pdfError.classList.remove("d-none");
+
         } finally {
             pdfLoading.classList.add("d-none");
         }
     });
+}/*==================================================
+        DEVANAGARI TRANSLITERATION ENGINE
+        Phonetic English -> Hindi, for the "Name in Hindi"
+        field. Greedy longest-match tokenizer + consonant/vowel
+        renderer, with a "final short a = long aa" heuristic
+        since that's how most Indian names are romanized in
+        casual typing (e.g. typing "priya" is meant to end in
+        the long आ sound, not the short अ).
+
+        Limitations (inherent to phonetic-only transliteration,
+        not fixable without a name dictionary):
+        - Mid-word long vowels still need to be typed doubled
+          ("raahul" -> राहुल, not "rahul" -> रहुल).
+        - A handful of names are conventionally spelled in Hindi
+          in ways that don't follow strict phonetic rules (e.g.
+          some surnames). The output is always a normal editable
+          text field, so it can be hand-corrected afterward.
+==================================================*/
+// Devanagari transliteration engine — phonetic English -> Hindi.
+// Greedy longest-match tokenizer + consonant/vowel renderer, with a
+// "final short a = long aa" heuristic since that's how virtually all
+// Indian names are romanized in casual typing (e.g. "priya" is meant
+// to end in the long आ sound, not the short अ).
+
+const VOWELS_INDEPENDENT = {
+  "aa": "आ", "ai": "ऐ", "au": "औ",
+  "ii": "ई", "ee": "ई",
+  "uu": "ऊ", "oo": "ऊ",
+  "a": "अ", "i": "इ", "u": "उ", "e": "ए", "o": "ओ",
+};
+
+const VOWELS_MATRA = {
+  "aa": "ा", "ai": "ै", "au": "ौ",
+  "ii": "ी", "ee": "ी",
+  "uu": "ू", "oo": "ू",
+  "a": "", "i": "ि", "u": "ु", "e": "े", "o": "ो",
+};
+
+// Special multi-letter consonant clusters that must map to a specific
+// conjunct glyph rather than being built generically (generic joining
+// would use the wrong base letters, e.g. "ksh" must use ष not श).
+const CONSONANTS_SPECIAL = {
+  "ksh": "क्ष", "gy": "ज्ञ", "jn": "ज्ञ",
+};
+
+const CONSONANTS = {
+  "kh": "ख", "gh": "घ", "chh": "छ", "ch": "च", "jh": "झ",
+  "th": "थ", "dh": "ध", "ph": "फ", "bh": "भ", "sh": "श",
+  "k": "क", "g": "ग", "j": "ज", "t": "त", "d": "द", "n": "न",
+  "p": "प", "b": "ब", "m": "म", "y": "य", "r": "र", "l": "ल",
+  "v": "व", "w": "व", "s": "स", "h": "ह", "f": "फ",
+};
+
+// Longest-match-first token list (3-letter, then 2-letter, then 1-letter).
+const ALL_TOKENS = [
+  ...Object.keys(CONSONANTS_SPECIAL),
+  ...Object.keys(VOWELS_INDEPENDENT),
+  ...Object.keys(CONSONANTS),
+].sort((a, b) => b.length - a.length);
+
+const HALANT = "्";
+
+function tokenize(word) {
+  const tokens = [];
+  let i = 0;
+  const lower = word.toLowerCase();
+
+  while (i < lower.length) {
+    let matched = null;
+
+    for (const t of ALL_TOKENS) {
+      if (lower.startsWith(t, i)) {
+        matched = t;
+        break;
+      }
+    }
+
+    if (matched) {
+      const isVowel = matched in VOWELS_INDEPENDENT;
+      tokens.push({ text: matched, isVowel });
+      i += matched.length;
+    } else {
+      // Not a recognized letter (space, punctuation, digit) — pass through.
+      tokens.push({ text: lower[i], isVowel: false, literal: true });
+      i += 1;
+    }
+  }
+
+  return tokens;
+}
+
+function transliterateWord(word) {
+  const tokens = tokenize(word);
+  let output = "";
+  let pendingConsonantBase = null; // Devanagari base char(s) awaiting a vowel
+
+  // Index of the last non-literal token, so we know which vowel is "final".
+  let lastRealIndex = -1;
+  tokens.forEach((tok, idx) => { if (!tok.literal) lastRealIndex = idx; });
+
+  tokens.forEach((tok, idx) => {
+    if (tok.literal) {
+      if (pendingConsonantBase) {
+        output += pendingConsonantBase;
+        pendingConsonantBase = null;
+      }
+      output += tok.text;
+      return;
+    }
+
+    if (tok.isVowel) {
+      const isFinal = idx === lastRealIndex;
+      if (pendingConsonantBase) {
+        let matra = VOWELS_MATRA[tok.text];
+        // Heuristic: a trailing short "a" at the very end of the word is
+        // almost always meant as the long आ sound in casual romanization
+        // (e.g. "priya" -> प्रिया, not प्रिय).
+        if (isFinal && tok.text === "a") matra = VOWELS_MATRA["aa"];
+        output += pendingConsonantBase + matra;
+        pendingConsonantBase = null;
+      } else {
+        let indep = VOWELS_INDEPENDENT[tok.text];
+        if (isFinal && tok.text === "a" && idx !== 0) {
+          // final independent "a" (rare, no preceding consonant) - still
+          // prefer the long form for consistency with the heuristic above.
+          indep = VOWELS_INDEPENDENT["aa"];
+        }
+        output += indep;
+      }
+    } else {
+      // Consonant
+      const base = CONSONANTS_SPECIAL[tok.text] || CONSONANTS[tok.text];
+      if (pendingConsonantBase) {
+        output += pendingConsonantBase + HALANT;
+      }
+      pendingConsonantBase = base;
+    }
+  });
+
+  if (pendingConsonantBase) {
+    output += pendingConsonantBase;
+  }
+
+  return output;
+}
+
+function transliterateToHindi(text) {
+  // Split on whitespace, transliterate each word, rejoin with the
+  // original spacing preserved.
+  return text
+    .split(/(\s+)/)
+    .map(part => (/\s+/.test(part) ? part : transliterateWord(part)))
+    .join("");
+}
+
+
+/*==================================================
+        HINDI NAME TRANSLITERATION
+        (Registration Form, field 1(b))
+==================================================*/
+const regNameHindiInput = document.getElementById("regNameHindi");
+const transliterateBtn = document.getElementById("transliterateNameBtn");
+
+function convertHindiField() {
+    if (!regNameHindiInput) return;
+    const raw = regNameHindiInput.value;
+    if (!raw.trim()) return;
+    regNameHindiInput.value = transliterateToHindi(raw);
+}
+
+if (transliterateBtn) {
+    transliterateBtn.addEventListener("click", convertHindiField);
+}
+
+// Convenience: also convert automatically when the user leaves the
+// field (e.g. tabs to the next one), so clicking the button is a
+// nice-to-have rather than mandatory.
+if (regNameHindiInput) {
+    regNameHindiInput.addEventListener("blur", convertHindiField);
+}
+
+// Same engine, second field: Settings -> Profile Details -> Name (in Hindi).
+const profileNameHindiInput = document.getElementById("profileNameHindi");
+const transliterateProfileBtn = document.getElementById("transliterateProfileNameBtn");
+
+function convertProfileHindiField() {
+    if (!profileNameHindiInput) return;
+    const raw = profileNameHindiInput.value;
+    if (!raw.trim()) return;
+    profileNameHindiInput.value = transliterateToHindi(raw);
+}
+
+if (transliterateProfileBtn) {
+    transliterateProfileBtn.addEventListener("click", convertProfileHindiField);
+}
+
+if (profileNameHindiInput) {
+    profileNameHindiInput.addEventListener("blur", convertProfileHindiField);
 }

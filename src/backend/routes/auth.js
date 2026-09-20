@@ -6,7 +6,6 @@ const rateLimit = require("express-rate-limit");
 
 const User = require("../models/User");
 const Otp = require("../models/Otp");
-const { Student } = require("../models/Student"); // Connect to Postgres
 const { requireAuth } = require("../middleware/auth_middle");
 const { sendMail, otpEmailTemplate, tempPasswordEmailTemplate } = require("../utils/mailer");
 const { generateOtp, hashOtp, compareOtp, generateTempPassword } = require("../utils/otp");
@@ -38,6 +37,12 @@ function signVerificationToken(email) {
 
 function signSessionToken(userId) {
   return jwt.sign({ sub: userId }, process.env.JWT_SESSION_SECRET, {
+    expiresIn: process.env.SESSION_TOKEN_EXPIRES_IN || "7d",
+  });
+}
+
+function signAdminSessionToken() {
+  return jwt.sign({ sub: "admin", role: "admin" }, process.env.JWT_SESSION_SECRET, {
     expiresIn: process.env.SESSION_TOKEN_EXPIRES_IN || "7d",
   });
 }
@@ -219,8 +224,28 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Email and password are required." });
     }
 
+    // Same login form, no separate admin username: if the password
+    // matches the admin secret (hashed in .env, never in source), this
+    // becomes an admin session regardless of whether the email belongs
+    // to a real student account. Checked first, before the normal
+    // student lookup below.
+    if (process.env.ADMIN_PASSWORD_HASH) {
+      const isAdminPassword = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+
+      if (isAdminPassword) {
+        const sessionToken = signAdminSessionToken();
+
+        return res.json({
+          message: "Admin login successful.",
+          sessionToken,
+          isAdmin: true,
+          user: { email, fullname: "Administrator" },
+        });
+      }
+    }
+
     const user = await User.findOne({ email });
-    
+
     // Same generic error whether the email doesn't exist or the password
     // is wrong, so we don't leak which emails are registered.
     if (!user) {
@@ -237,6 +262,7 @@ router.post("/login", async (req, res) => {
     return res.json({
       message: "Login successful.",
       sessionToken,
+      isAdmin: false,
       user: {
         id: user._id,
         email: user.email,
@@ -360,30 +386,16 @@ router.post("/forgot-password", otpLimiter, async (req, res) => {
 /* ==============================
       CURRENT USER PROFILE
 ============================== */
+
 router.get("/me", requireAuth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    // Reach into PostgreSQL for the official Admin records
-    const pgStudent = await Student.findOne({ where: { email: user.email } });
-
-    // Merge the official Postgres data into the response
-    const profileData = {
-        id: user._id,
-        email: user.email,
-        fullname: pgStudent ? pgStudent.fullname : (user.fullname || ""),
-        mobile: pgStudent ? pgStudent.mobile : (user.mobile || ""),
-        department: pgStudent ? pgStudent.department : "Computer Science and Technology",
-        enrollmentNo: pgStudent ? pgStudent.enrollmentNo : "Pending Admin Input" // <-- ADDED THIS
-    };
-
-    return res.json({ 
-        user: profileData, 
-        feeStatus: pgStudent ? pgStudent.feeStatus : false 
-    });
+    return res.json({ user });
   } catch (err) {
     console.error("me error:", err);
     return res.status(500).json({ error: "Could not load your profile right now." });

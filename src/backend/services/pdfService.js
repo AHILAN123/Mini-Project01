@@ -7,40 +7,58 @@ async function generatePDF(studentData) {
     let browser;
 
     try {
+        console.log("1. Starting Puppeteer...");
+
         browser = await puppeteer.launch({
-            headless: true,
-             executablePath:"C:\\Users\\shubh\\.cache\\puppeteer\\chrome\\win64-151.0.7922.71\\chrome-win64\\chrome.exe",
+            headless: "shell",
+            /* No executablePath: let Puppeteer find the browser it downloaded for itself (in node_modules/.puppeteer or its cache dir). 
+            This is what makes the code portable across machines and OSes, and avoids silent hangs when a hardcoded path points at a browser 
+            that no longer exists. */
+
             args: [
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
-                "--disable-gpu"
-            ]
+                "--disable-gpu",
+                "--disable-dev-shm-usage"
+            ],
+            // Fail fast instead of hanging forever if launch or any
+            // CDP call gets stuck.
+            timeout: 30000,
+            protocolTimeout: 30000
         });
 
+        console.log("2. Browser launched");
+
         const page = await browser.newPage();
+
+        console.log("3. New page created");
 
         const templatePath = path.join(
             __dirname,
             "form-template.ejs"
         );
 
-        // Render EJS → HTML
+        console.log("4. Rendering EJS...");
+
         const html = await ejs.renderFile(
             templatePath,
             studentData
         );
 
-        // Put HTML into Puppeteer's browser
+        console.log("5. EJS rendered");
+
         await page.setContent(html, {
-            waitUntil: "networkidle0"
+            waitUntil: "domcontentloaded",
+            timeout: 30000
         });
+
+        console.log("6. HTML loaded");
 
         const outputDirectory = path.join(
             __dirname,
             "../public/generatedPdfs"
         );
 
-        // Make sure directory exists
         await fs.promises.mkdir(outputDirectory, {
             recursive: true
         });
@@ -50,18 +68,22 @@ async function generatePDF(studentData) {
             `${studentData.student.enrolmentNo}.pdf`
         );
 
-        // HTML → PDF
+        console.log("7. Generating PDF...");
+
         await page.pdf({
             path: pdfPath,
             format: "A4",
             printBackground: true
         });
 
+        console.log("8. PDF generated:", pdfPath);
+
         return pdfPath;
 
     } finally {
         if (browser) {
             await browser.close();
+            console.log("9. Browser closed");
         }
     }
 }

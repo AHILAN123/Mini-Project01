@@ -1,13 +1,12 @@
 // Date
-const getCurrentDate = () => {
-  const date = new Date();
-
+const formatDate = (date) => {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-
   return `${day}/${month}/${year}`;
 };
+
+const getCurrentDate = () => formatDate(new Date());
 
 // Department, Programme, Specialisation
 const getProgrammeDetails = (enrollmentId) => {
@@ -62,6 +61,8 @@ module.exports= consolidateStudentData = (data) => {
     // Fix: default to [] so an empty result set doesn't throw on .map().
     theorySubjects = [],
     practicalSubjects = [],
+    amountPaid,
+    paymentDate
   } = data;
 
   const programmeDetails = getProgrammeDetails(enrollmentId);
@@ -81,8 +82,8 @@ module.exports= consolidateStudentData = (data) => {
     },
 
     fee: {
-      amountPaid: "",
-      paymentDate: "",
+       amountPaid: amountPaid != null ? String(amountPaid) : "",
+       paymentDate: paymentDate ? formatDate(new Date(paymentDate)) : "",
     },
 
     theorySubjects: theorySubjects.map((subject) => ({

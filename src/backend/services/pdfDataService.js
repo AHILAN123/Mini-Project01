@@ -1,5 +1,8 @@
 const pool = require("../config/postgres");
 
+// Valid course codes for pre-checking before making the SQL query
+const VALID_COURSE_CODES = ["CSB", "CSM", "CSP", "ITB", "ITM", "ITP"];
+
 const getCurrentRegistrationData = async (enrollmentId) => {
     enrollmentId=enrollmentId.toUpperCase();
     // Getting student data
@@ -24,8 +27,13 @@ const getCurrentRegistrationData = async (enrollmentId) => {
 
     // Extracting details from enrollment number
     const enrollmentYear = Number(enrollmentId.substring(0, 4));
-    const courseCode = enrollmentId.substring(4, 7);
+    const courseCode = enrollmentId.substring(4, 7).toUpperCase();
     const semester = getCurrentSemester(enrollmentYear);
+
+    // Checking if couse code is not tampered to attack DB
+    if (!VALID_COURSE_CODES.includes(courseCode)) {
+    throw new Error(`Invalid programme code: ${courseCode}`);
+}
 
     const gsuiteId = getGsuiteId(
         enrollmentId,
@@ -47,6 +55,14 @@ const getCurrentRegistrationData = async (enrollmentId) => {
         `,
         [semester]
     );
+
+    // Fetching fee payment details
+    const feeResult = await pool.query(
+    `SELECT amount_paid, payment_date FROM fee_payments
+     WHERE enrollment_id = $1 AND semester = $2`,
+    [enrollmentId, semester]
+);
+    const fee = feeResult.rows[0] || {};
 
     // Separating theory and practical subjects
     const theorySubjects =
@@ -70,7 +86,9 @@ const getCurrentRegistrationData = async (enrollmentId) => {
         gsuiteId: gsuiteId,
         semester: semester,
         theorySubjects: theorySubjects,
-        practicalSubjects: practicalSubjects
+        practicalSubjects: practicalSubjects,
+        amountPaid: fee.amount_paid, 
+        paymentDate: fee.payment_date
     };
 };
 
